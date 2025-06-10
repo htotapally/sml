@@ -13,6 +13,7 @@ ros2 run py_srvcli robotmanager
 
 sudo docker logs robot
 
+Launching robot:
 docker run -it --name robot --network=host -v ~/ros2_ws:/ros2_ws orderclient
 from the default directory, /ros2_ws# run 
 source install/setup.bash
