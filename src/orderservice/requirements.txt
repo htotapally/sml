@@ -1,0 +1,7 @@
+cherrypy
+tomlkit
+cherrypy_cors
+requests
+urllib3
+psycopg2
+stripe
