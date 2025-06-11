@@ -1,10 +1,31 @@
-Build docker container for static content
+Work in progress
 
-docker build -t sml-apache2 .
+Requirements
+postgres
+configured with a starter database, and configured for network access.  This will be moved into its own docker container later
 
-docker run -d --name sml-running-httpd -p 8080:80 sml-apache2
+kafka
+configured with the required topics.  This will be moved into its own docker later
 
-sudo docker stop sml-running-httpd
+Directory structure
 
+haproxy
 
-sudo docker rm sml-running-httpd
+kafka
+
+orderdispatcher
+
+orderservice
+
+postgres
+
+productprovider
+
+robot
+
+robotmanager
+
+web
+
+Each directory has README.md file for building and running docker images
+
