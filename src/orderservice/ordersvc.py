@@ -8,7 +8,7 @@ class OrderSvc:
         pass
         
     def getorders(self):
-      conn = psycopg2.connect(database="template1", user="postgres", password="H0peless!", host="192.168.1.170", port="5432")
+      conn = psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432")
       with conn:
         cur = conn.cursor()
         qry = """
@@ -26,7 +26,7 @@ class OrderSvc:
       return ordereditems
       
     def getorder(self, orderid):
-      conn = psycopg2.connect(database="template1", user="postgres", password="H0peless!", host="192.168.1.170", port="5432")
+      conn = psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432")
       with conn:
         cur = conn.cursor()
         qry = """
@@ -52,7 +52,7 @@ class OrderSvc:
         itemids = dict.keys()
         itemsordered = []
         orderid = uuid.uuid4()
-        conn = psycopg2.connect(database="template1", user="postgres", password="H0peless!", host="192.168.1.170", port="5432")
+        conn = psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432")
 
         with conn:
           for itemid in itemids:
@@ -84,7 +84,7 @@ class OrderSvc:
 
         status = "Acknowledged"                
         try:
-          with psycopg2.connect(database="template1", user="postgres", password="H0peless!", host="192.168.1.170", port="5432") as conn:
+          with psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432") as conn:
             with  conn.cursor() as cur:
                 # execute the UPDATE statement
                 cur.execute(sql, (status, orderid))
@@ -107,7 +107,7 @@ class OrderSvc:
 
         status = "Completed"                
         try:
-          with psycopg2.connect(database="template1", user="postgres", password="H0peless!", host="192.168.1.170", port="5432") as conn:
+          with psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432") as conn:
             with  conn.cursor() as cur:
                 # execute the UPDATE statement
                 cur.execute(sql, (status, orderid))
