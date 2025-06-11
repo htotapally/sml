@@ -2,6 +2,7 @@ Update connection info in ordersvc.py
 
 conn = psycopg2.connect(database="template1", user="postgres", password="<REPLACEME>", host="192.168.1.170", port="5432")
       
+Update stripe key in webserver.py if needed.
 
 Building Docker image
 sudo docker build -t orderservice .
@@ -14,5 +15,6 @@ http://locahost:8090/
 
 Viewing container logs
 sudo docker logs orderservice
+
 
 pg_isready -d template1 -h 192.168.1.170 -p 5432 -U postgres   
