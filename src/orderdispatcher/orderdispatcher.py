@@ -42,7 +42,7 @@ class OrderDispatcher():
             producer.close()        
 
     def getorders(self):
-      conn = psycopg2.connect(database="template1", user="postgres", password="H0peless!", host="192.168.1.170", port="5432")
+      conn = psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432")
       with conn:
         cur = conn.cursor()
         qry = """
