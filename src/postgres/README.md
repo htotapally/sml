@@ -1,8 +1,18 @@
-
 Work in progress
+This can be containerised later.
+
+Building docker image
+docker build -t my-postgres-db ./
+
+Running database
+docker run --name=world -e POSTGRES_PASSWORD=H0peless! -d -p 5432:5432 --network=host -v postgres_data:/var/lib/postgresql/data postgres
+
+docker run --name posttest -d -p 5432:5432 -e POSTGRES_PASSWORD=fred postgres:alpine
+
 
 Requirements
 Create database, template1.
+CREATE DATABASE world;
 
 Enable remote connections
 Update the following lines pg_hba.conf
@@ -17,6 +27,8 @@ Update listen_addresses in postgresql.conf as shown below:
 
 listen_addresses = '*'		# what IP address(es) to listen on;
 
+Restart the database.
+
 Create table using the following table definition:
 CREATE TABLE onlineorders (
     id SERIAL PRIMARY KEY,
@@ -27,4 +39,23 @@ CREATE TABLE onlineorders (
     SalePrice NUMERIC(6, 2),
     Status TEXT NOT NULL DEFAULT 'Created'
 );
+
+Connecting to postgres
+psql -h localhost -p 5432 -U postgres
+
+SHOW data_directory;
+
+List databases
+\l
+
+Switch to a database
+\c database_name
+\c world
+
+Show tables
+\dt
+SELECT * FROM pg_catalog.pg_tables;
+
+
+ 
 
