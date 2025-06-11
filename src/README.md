@@ -13,6 +13,8 @@ haproxy
 
 kafka
 
+orderclient
+
 orderdispatcher
 
 orderservice
@@ -21,11 +23,22 @@ postgres
 
 productprovider
 
-robot
+py_srvcli
 
-robotmanager
+py_srvcli_interface
 
 web
 
+
+Buliding for development purposes
+
 Each directory has README.md file for building and running docker images
+1. Build the action interface defined in py_srvcli_interface
+2. Build py_srvcli
+3. Create docker images for orderclient(robotmanager), orderservice(robot)
+4. Create all other docker images
+
+
+
+
 
