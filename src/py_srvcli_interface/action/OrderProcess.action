@@ -1,9 +1,0 @@
-# Define a goal for orderprocessing
-string orderdetails
----
-# Define the result that will be published after the action execution ends.
-string finalstatus
----
-# Define a feedback message that will be published during action execution.
-string processingstep
-
