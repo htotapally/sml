@@ -1,19 +1,44 @@
+import os.path
+import configparser
 import psycopg2
 import json
 
 from kafka import KafkaProducer
 
 class OrderDispatcher():
-    # Configuration
+    # Kafka Configuration
     bootstrap_servers = ['localhost:9092']  # Replace with your Kafka broker address
     topic_name = 'TutorialTopic'
     ready = True    
     
-    def __init__(self, topic, bootstrap):
+    # Postgres Configuration
+    database = "template1"
+    user = "postgres"
+    password = "REPLACEME"
+    host = "192.168.1.170"
+    port = 5432
+    
+    def __init__(self, dispconf):
       super().__init__()
+      print (dispconf)
+      config = configparser.ConfigParser()
+      config.read(dispconf)
+      topic = config.get('kafka', 'topic')
+      print(topic)
+      bootstrap = config.get('kafka', 'bootstrap')
+      print (bootstrap)
+      
+      # Set Kafka configuration
       self.topic_name = topic
-      self.bootstrap_servers = bootstrap
+      self.bootstrap_servers = eval(bootstrap)
 
+      # Set postgres configuration
+      self.database = config.get('postgres', 'database')
+      self.user = config.get('postgres', 'user')
+      self.password = config.get('postgres', 'password')
+      self.host = config.get('postgres', 'host')
+      self.port = config.get('postgres', 'port')
+          
     def dispatchorders(self):
       orders = self.getorders()
       for order in orders:
@@ -42,7 +67,7 @@ class OrderDispatcher():
             producer.close()        
 
     def getorders(self):
-      conn = psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432")
+      conn = self.getconn() # psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432")
       with conn:
         cur = conn.cursor()
         qry = """
@@ -57,12 +82,17 @@ class OrderDispatcher():
           ordereditems.append(row[0])
 
       return ordereditems
+
+    def getconn(self):
+      conn = psycopg2.connect(database=self.database, user=self.user, password=self.password, host=self.host, port=self.port)
+      return conn
             
 def main(args=None):
     print("Starting order dispatcher!")
+    dispconf = os.path.join(os.path.dirname(__file__), 'dispconf.conf')
     try:
       print('Within the try block')  
-      orderDispatcher = OrderDispatcher('TutorialTopic', '192.168.1.170:9092')
+      orderDispatcher = OrderDispatcher(dispconf)
       orderDispatcher.dispatchorders()
       print('After dispatchorders')
     except (KeyboardInterrupt):
