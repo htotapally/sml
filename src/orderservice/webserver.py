@@ -44,21 +44,21 @@ class WebServer:
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def getorders(self):
-      orderSvc = OrderSvc()
+      orderSvc = self.createordsvc()
       ordereditems = orderSvc.getorders()      
       return ordereditems
     
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def getorder(self, orderid):
-      orderSvc = OrderSvc()
+      orderSvc = self.createordsvc()
       ordereditems = orderSvc.getorder(orderid)
       return ordereditems
       
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def placeorder(self, cart):
-        orderSvc = OrderSvc()
+        orderSvc = self.createordsvc()
         message = orderSvc.placeorder(cart);
         return f'{message}'    
 
@@ -70,14 +70,14 @@ class WebServer:
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def acknowledge(self, orderid):
-        orderSvc = OrderSvc()
+        orderSvc = self.createordsvc()
         message = orderSvc.acknowledge(orderid)
         return message
     
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def complete(self, orderid):
-        orderSvc = OrderSvc()
+        orderSvc = self.createordsvc()
         message = orderSvc.acknowledge(orderid)
         return message
 
@@ -110,8 +110,16 @@ class WebServer:
             print(e) 
             return f'You have ordered' # json.dumps(error=str(e)), 403
     
-tutconf = os.path.join(os.path.dirname(__file__), 'tutorial.conf')
 
+    def createordsvc(self):
+        config = configparser.ConfigParser()
+        config.read(ordsvcconf)
+        orderSvc = OrderSvc(config)
+        return orderSvc
+         
+    
+tutconf = os.path.join(os.path.dirname(__file__), 'tutorial.conf')
+ordsvcconf = os.path.join(os.path.dirname(__file__), 'ordsvc.conf')
 stripe.api_key = 'sk_test_BQokikJOvBiI2HlWgH4olfQ2'
 
 
@@ -167,7 +175,6 @@ def cors_tool():
     
 def main():
     cherrypy_cors.install()
-    print (tutconf)
     config = configparser.ConfigParser()
     config.read(tutconf)
     port = config.getint('global', 'server.socket_port')
@@ -175,10 +182,9 @@ def main():
     host = config.get('global', 'server.socket_host')
     print (host)
     cherrypy.config.update({'server.socket_port': port, 'server.socket_host': '0.0.0.0', 'tools.CORS.on': True })
-    
+          
     cherrypy.tools.CORS = cherrypy.Tool('before_handler', cors_tool)    
     cherrypy.quickstart(WebServer())
-    # cherrypy.quickstart(WebServer(), config)
     
 if __name__ == '__main__':
     # CherryPy always starts with app.root when trying to map request URIs

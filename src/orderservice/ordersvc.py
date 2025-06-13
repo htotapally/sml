@@ -1,14 +1,20 @@
-import cherrypy
 import psycopg2
 import uuid
 import json
+import configparser
 
 class OrderSvc:
-    def __init__(self):
-        pass
+    def __init__(self, config):
+      # Set postgres configuration
+      self.database = config.get('postgres', 'database')
+      self.user = config.get('postgres', 'user')
+      self.password = config.get('postgres', 'password')
+      self.host = config.get('postgres', 'host')
+      self.port = config.get('postgres', 'port')        
+      pass
         
     def getorders(self):
-      conn = psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432")
+      conn = self.getconn()
       with conn:
         cur = conn.cursor()
         qry = """
@@ -26,7 +32,7 @@ class OrderSvc:
       return ordereditems
       
     def getorder(self, orderid):
-      conn = psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432")
+      conn = self.getconn()
       with conn:
         cur = conn.cursor()
         qry = """
@@ -52,7 +58,7 @@ class OrderSvc:
         itemids = dict.keys()
         itemsordered = []
         orderid = uuid.uuid4()
-        conn = psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432")
+        conn = self.getconn()
 
         with conn:
           for itemid in itemids:
@@ -84,7 +90,8 @@ class OrderSvc:
 
         status = "Acknowledged"                
         try:
-          with psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432") as conn:
+          conn = self.getconn()
+          with conn:
             with  conn.cursor() as cur:
                 # execute the UPDATE statement
                 cur.execute(sql, (status, orderid))
@@ -107,7 +114,7 @@ class OrderSvc:
 
         status = "Completed"                
         try:
-          with psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432") as conn:
+            conn = self.getconn()
             with  conn.cursor() as cur:
                 # execute the UPDATE statement
                 cur.execute(sql, (status, orderid))
@@ -119,7 +126,11 @@ class OrderSvc:
           print(error)
         finally:
           return f'Order {orderid} with {updated_row_count} items is {status}'      
-    
+
+    def getconn(self):
+      conn = psycopg2.connect(database=self.database, user=self.user, password=self.password, host=self.host, port=self.port)
+      return conn
+      
 def saleprice(item):
     print(item.get('itemId'))
     regular = item.get('price').get('regular')
