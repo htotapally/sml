@@ -1,7 +1,5 @@
-Update connection info in ordersvc.py
+Update postgres configuration info in ordsvc.conf
 
-conn = psycopg2.connect(database="template1", user="postgres", password="<REPLACEME>", host="192.168.1.170", port="5432")
-      
 Update stripe key in webserver.py if needed.
 
 Building Docker image
