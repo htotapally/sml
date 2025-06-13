@@ -9,6 +9,19 @@ ord_srvcli
 ord_srvcli_interfaces
 ord_srv_mgr
 
+Building ROS packages
+Checkout the folders
+ord_srvcli
+ord_srvcli_interfaces
+ord_srv_mgr 
+into <ROS Workspace>/src
+from a terminal, change working directory to <ROS Workspace>
+Run the build command:
+colcon build
+The build would create the necessary packages to run delivery automation code.
+
+
+
 kafka
 configured with the required topics.  This will be moved into its own docker later
 
