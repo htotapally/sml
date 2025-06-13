@@ -60,7 +60,7 @@ class WebServer:
         print (price)
         return str(price)
     
-tutconf = os.path.join(os.path.dirname(__file__), 'tutorial.conf')
+webserverconf = os.path.join(os.path.dirname(__file__), 'webserver.conf')
 
 def cors_tool():
     '''
@@ -108,14 +108,14 @@ def cors_tool():
     
 def main():
     cherrypy_cors.install()
-    print (tutconf)
+    print (webserverconf)
     config = configparser.ConfigParser()
-    config.read(tutconf)
+    config.read(webserverconf)
     port = config.getint('global', 'server.socket_port')
     print(port)
     host = config.get('global', 'server.socket_host')
     print (host)
-    cherrypy.config.update({'server.socket_port': port, 'server.socket_host': '0.0.0.0', 'tools.CORS.on': True })
+    cherrypy.config.update({'server.socket_port': port, 'server.socket_host': host, 'tools.CORS.on': True })
     
     cherrypy.tools.CORS = cherrypy.Tool('before_handler', cors_tool)    
     cherrypy.quickstart(WebServer())
