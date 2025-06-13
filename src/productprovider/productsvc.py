@@ -40,8 +40,4 @@ class ProductSvc:
           else:
             continue
         
-        return itemFiltered    
-    
-# resp = requests.get(f"{self.couchurl}_all_docs?include_docs=true")
-# data = json.loads(resp.text)
-# couchurl = "http://admin:hopeless@127.0.0.1:5984/rostest/"
+        return itemFiltered
