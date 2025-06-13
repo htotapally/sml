@@ -45,6 +45,21 @@ Buliding for development purposes
 
 Each directory has README.md file. Follow instructions for building and running images/apps
 
+For running web components run the following docker images:
+haproxy
+
+kafka
+
+orderdispatcher
+
+orderservice
+
+postgres
+
+productprovider
+
+Once all docker images are run, and docker containers are created and up an running the web front is accessible using the url http://localhost/
+
 
 
 
