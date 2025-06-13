@@ -5,7 +5,7 @@ Building docker image
 docker build -t my-postgres-db ./
 
 Running database
-docker run --name=world -e POSTGRES_PASSWORD=H0peless! -d -p 5432:5432 --network=host -v postgres_data:/var/lib/postgresql/data postgres
+docker run --name=world -e POSTGRES_PASSWORD=REPLACEM -d -p 5432:5432 --network=host -v postgres_data:/var/lib/postgresql/data postgres
 
 docker run --name posttest -d -p 5432:5432 -e POSTGRES_PASSWORD=fred postgres:alpine
 
