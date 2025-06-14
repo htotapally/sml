@@ -19,9 +19,9 @@ class OrderProcessingClient(Node):
     bootstrap_servers = ['192.168.1.170:9092']  # Replace with your Kafka broker address
     producer_topic_name = 'OrderStatus'
     
-    def __init__(self, producer_topic_name, bootstrap_servers_list):
+    def __init__(self, actionname, producer_topic_name, bootstrap_servers_list):
         super().__init__('orderprocessing_action_client')
-        self._action_client = ActionClient(self, OrderProcess, 'orderprocess')
+        self._action_client = ActionClient(self, OrderProcess, actionname)
         self.producer_topic_name = producer_topic_name
         self.bootstrap_servers = bootstrap_servers_list
 
@@ -87,6 +87,9 @@ def main(args=None):
     config = configparser.ConfigParser()
     config.read(svrmgrconf)
 
+    actionname = config.get('robot', 'actionname')
+    print (actionname)
+    
     consumer_topic_name = config.get('kafka', 'consumertopic')
     print (consumer_topic_name)
     
@@ -105,7 +108,7 @@ def main(args=None):
                                           message.value))
       try:
         rclpy.init()
-        action_client = OrderProcessingClient(producer_topic_name, bootstrap_servers_list)
+        action_client = OrderProcessingClient(actionname, producer_topic_name, bootstrap_servers_list)
         action_client.send_goal(message.value)
         rclpy.spin(action_client)
             
