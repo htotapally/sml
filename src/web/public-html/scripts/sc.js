@@ -374,23 +374,13 @@ function createrow(item, keys, addqty = true, adddeletebtn = false) {
 	}
 	
 	if (key == "Brand") {
-		const img = document.createElement('img');
 		const brand = item[key] || "";
-		if (brand == "SWAD") {
-			img.src = "/images/600x400/FF5733/FFFFFF/Swad.png";
-		} else if (brand == "Aashirvaad") {
-			img.src = "/images/600x400/FF5733/FFFFFF/Ahirvad.png";
-		} else if (brand == "GSK") {
-			img.src = "/images/600x400/FF5733/FFFFFF/gsk.png";
-		} else if (brand == "Lipton") {
-			img.src = "/images/600x400/FF5733/FFFFFF/Lipton.png";
-		} else if (brand == "Laxmi") {
-			img.src = "/images/600x400/FF5733/FFFFFF/Laxmi.png";
-		} else if (brand == "GSK") {
-			img.src = "/images/600x400/FF5733/FFFFFF/gsk.png";
+		const imagePath = largeBrandImageMap.get(brand);
+		if (typeof imagePath !== 'undefined') {
+			const img = document.createElement('img');
+			img.src = imagePath;
+			div.appendChild(img)		
 		}
-		
-		div.appendChild(img)		
 	}
 
 	const td = document.createElement('td');
