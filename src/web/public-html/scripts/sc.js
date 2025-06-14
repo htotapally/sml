@@ -364,12 +364,23 @@ function createdelbtn(item, qty) {
 function createrow(item, keys, addqty = true, adddeletebtn = false) {
   const row = document.createElement('tr');
   keys.forEach(key => {
-    const td = document.createElement('td');
-    td.textContent = item[key] || ""; // Fill empty fields with blank
+	const div = document.createElement('div');
+	div.textContent = item[key] || ""; // Fill empty fields with blank		
+
+	if (key == "ProduceName") {
+		console.log("Add Image");
+		const img = document.createElement('img');
+		img.src = "/images/600x400/FF5733/FFFFFF/AshirvadAtta";
+		div.appendChild(img) 		
+	}
+
+	const td = document.createElement('td');
+    td.appendChild(div);	
     if (key == "Regular Price" || key == "Promotional Price" || key == "Sale Price") {
       td.style.textAlign = 'right';
     }
 
+	
     row.appendChild(td);
   });
 
