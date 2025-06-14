@@ -1,5 +1,4 @@
 tomlkit
 requests
 urllib3
-psycopg2
 kafka-python

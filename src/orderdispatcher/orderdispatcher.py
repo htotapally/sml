@@ -1,7 +1,7 @@
 import os.path
 import configparser
-import psycopg2
 import json
+import requests
 
 from kafka import KafkaProducer
 
@@ -9,14 +9,8 @@ class OrderDispatcher():
     # Kafka Configuration
     bootstrap_servers = ['localhost:9092']  # Replace with your Kafka broker address
     topic_name = 'TutorialTopic'
+    ordersurl = 'http://localhost/os/getorders'
     ready = True    
-    
-    # Postgres Configuration
-    database = "template1"
-    user = "postgres"
-    password = "REPLACEME"
-    host = "192.168.1.170"
-    port = 5432
     
     def __init__(self, dispconf):
       super().__init__()
@@ -31,14 +25,10 @@ class OrderDispatcher():
       # Set Kafka configuration
       self.topic_name = topic
       self.bootstrap_servers = eval(bootstrap)
+      
+      # Url to fetch unfilled orders
+      self.ordersurl = config.get('orders', 'ordersurl')
 
-      # Set postgres configuration
-      self.database = config.get('postgres', 'database')
-      self.user = config.get('postgres', 'user')
-      self.password = config.get('postgres', 'password')
-      self.host = config.get('postgres', 'host')
-      self.port = config.get('postgres', 'port')
-          
     def dispatchorders(self):
       orders = self.getorders()
       for order in orders:
@@ -47,6 +37,7 @@ class OrderDispatcher():
 
     def dispatchorder(self, cart):
 
+        print(cart)
         # Create a Kafka producer instance
         producer = KafkaProducer(
             bootstrap_servers = self.bootstrap_servers,
@@ -67,25 +58,10 @@ class OrderDispatcher():
             producer.close()        
 
     def getorders(self):
-      conn = self.getconn() # psycopg2.connect(database="template1", user="postgres", password="REPLACEME", host="192.168.1.170", port="5432")
-      with conn:
-        cur = conn.cursor()
-        qry = """
-            select to_json (json_build_object('id', id, 'createtime', createtime,'orderid', orderid,'itemid', itemid,'qty', qty,'saleprice', saleprice)) FROM onlineorders WHERE status = 'Created';
-        """
-        print (f"{qry}")
-        
-        cur.execute(qry)
-        rows = cur.fetchall()
-        ordereditems = []
-        for row in rows:
-          ordereditems.append(row[0])
-
+      ordersurl = "http://localhost/os/getorders"
+      resp = requests.get(ordersurl)
+      ordereditems = json.loads(resp.text)
       return ordereditems
-
-    def getconn(self):
-      conn = psycopg2.connect(database=self.database, user=self.user, password=self.password, host=self.host, port=self.port)
-      return conn
             
 def main(args=None):
     print("Starting order dispatcher!")
