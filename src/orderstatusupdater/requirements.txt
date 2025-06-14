@@ -1,0 +1,4 @@
+tomlkit
+requests
+urllib3
+kafka-python
