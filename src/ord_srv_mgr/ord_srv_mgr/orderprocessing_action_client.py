@@ -1,5 +1,7 @@
 import rclpy
 import json
+import os.path
+import configparser
 
 from rclpy.action import ActionClient
 from rclpy.executors import ExternalShutdownException
@@ -15,11 +17,13 @@ from launch import LaunchDescription
 class OrderProcessingClient(Node):
     # Configuration
     bootstrap_servers = ['192.168.1.170:9092']  # Replace with your Kafka broker address
-    topic_name = 'OrderStatus'
+    producer_topic_name = 'OrderStatus'
     
-    def __init__(self):
+    def __init__(self, producer_topic_name, bootstrap_servers_list):
         super().__init__('orderprocessing_action_client')
         self._action_client = ActionClient(self, OrderProcess, 'orderprocess')
+        self.producer_topic_name = producer_topic_name
+        self.bootstrap_servers = bootstrap_servers_list
 
     def send_goal(self, order):
         print (order)
@@ -52,7 +56,7 @@ class OrderProcessingClient(Node):
         self.get_logger().info('Result: {0}'.format(result.finalstatus))
         rclpy.shutdown()
         
-        # Need to publish the status to Kusto
+        # Need to publish the status to Kafka
         # Create a Kafka producer instance
         producer = KafkaProducer(
             bootstrap_servers = self.bootstrap_servers,
@@ -63,7 +67,7 @@ class OrderProcessingClient(Node):
         message = { 'orderid': self.orderid, 'finalstatus': result.finalstatus }
         # Send message to Kafka
         try:
-            producer.send(self.topic_name, value=message)
+            producer.send(self.producer_topic_name, value=message)
             producer.flush() # Ensure message is sent
             print("OrderStatus published successfully!")
         except Exception as e:
@@ -78,18 +82,37 @@ class OrderProcessingClient(Node):
 
 def main(args=None):
     print ('Order action client is starting')
-    consumer = KafkaConsumer('TutorialTopic', bootstrap_servers='localhost:9092')
+    svrmgrconf = os.path.join(os.path.dirname(__file__), 'config/svrmgr.conf')
+    print(svrmgrconf)
+    config = configparser.ConfigParser()
+    config.read(svrmgrconf)
+
+    consumer_topic_name = config.get('kafka', 'consumertopic')
+    print (consumer_topic_name)
+    
+    producer_topic_name = config.get('kafka', 'producertopic')
+    print (producer_topic_name)
+        
+    bootstrap_servers = config.get('kafka', 'bootstrap')
+    print (bootstrap_servers)
+    bootstrap_servers_list = eval(bootstrap_servers)
+
+    consumer = KafkaConsumer(consumer_topic_name, bootstrap_servers = bootstrap_servers_list)          
     for message in consumer:
+      print('==========================================================')
       print ("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
                                           message.offset, message.key,
                                           message.value))
       try:
         rclpy.init()
-        action_client = OrderProcessingClient()
+        action_client = OrderProcessingClient(producer_topic_name, bootstrap_servers_list)
         action_client.send_goal(message.value)
         rclpy.spin(action_client)
+            
+        # consumer.commit()
       except (KeyboardInterrupt, ExternalShutdownException):
         pass
+
     
 if __name__ == '__main__':
     main()
