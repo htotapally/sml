@@ -1,5 +1,6 @@
 import time
-
+import os.path
+import configparser
 import rclpy
 from rclpy.action import ActionServer
 from rclpy.executors import ExternalShutdownException
@@ -9,12 +10,12 @@ from ord_srvcli_interfaces.action import OrderProcess
 
 class OrderProcessingActionServer(Node):
 
-    def __init__(self):
+    def __init__(self, actionname):
         super().__init__('orderprocessing_action_server')
         self._action_server = ActionServer(
             self,
             OrderProcess,
-            'orderprocess',
+            actionname,
             self.execute_callback)
 
     def execute_callback(self, goal_handle):
@@ -40,10 +41,18 @@ class OrderProcessingActionServer(Node):
 
 
 def main():
+    ordsvcconf = os.path.join(os.path.dirname(__file__), 'config/ordsvcclient.conf')
+    print(ordsvcconf)
+    config = configparser.ConfigParser()
+    config.read(ordsvcconf)
+
+    actionname = config.get('robot', 'actionname')
+    print (actionname)
+        
     try:
         rclpy.init()
         print("Waiting for instructions")
-        orderProcessingActionServer = OrderProcessingActionServer()
+        orderProcessingActionServer = OrderProcessingActionServer(actionname)
 
         rclpy.spin(orderProcessingActionServer)
     except (KeyboardInterrupt, ExternalShutdownException):
