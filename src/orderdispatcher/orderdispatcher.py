@@ -58,7 +58,7 @@ class OrderDispatcher():
             producer.close()        
 
     def getorders(self):
-      ordersurl = "http://localhost/os/getorders"
+      ordersurl = self.ordersurl
       resp = requests.get(ordersurl)
       ordereditems = json.loads(resp.text)
       return ordereditems
