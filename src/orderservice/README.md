@@ -1,6 +1,6 @@
 Update postgres configuration info in ordsvc.conf
 Update webserver configuration in webserver.conf
-Update stripe key in webserver.py if needed.
+Update stripe key in webserver.conf.
 
 Building Docker image
 sudo docker build -t orderservice .
