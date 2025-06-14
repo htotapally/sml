@@ -3,10 +3,9 @@ MAINTAINER Hara Totapally
 LABEL version="0.1"
 
 COPY requirements.txt requirements.txt 
-RUN apk add --no-cache postgresql-dev gcc musl-dev
 RUN pip install -r requirements.txt
 
-COPY orderdispatcher.py orderdispatcher.py
+COPY orderstatusupdater.py orderstatusupdater.py
 COPY dispconf.conf dispconf.conf
 
-ENTRYPOINT ["python3", "orderdispatcher.py"]
+ENTRYPOINT ["python3", "orderstatusupdater.py"]
