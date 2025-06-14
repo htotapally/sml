@@ -120,7 +120,6 @@ class WebServer:
     
 webserverconf = os.path.join(os.path.dirname(__file__), 'webserver.conf')
 ordsvcconf = os.path.join(os.path.dirname(__file__), 'ordsvc.conf')
-stripe.api_key = 'sk_test_BQokikJOvBiI2HlWgH4olfQ2'
 
 
 def calculate_order_amount(items):
@@ -177,6 +176,9 @@ def main():
     cherrypy_cors.install()
     config = configparser.ConfigParser()
     config.read(webserverconf)
+    
+    stripe.api_key = config.get('stripe', 'stripe.api_key')
+
     port = config.getint('global', 'server.socket_port')
     print(port)
     host = config.get('global', 'server.socket_host')
