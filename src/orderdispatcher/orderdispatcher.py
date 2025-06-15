@@ -31,10 +31,14 @@ class OrderDispatcher():
 
     def dispatchorders(self):
       orders = self.getorders()
+      
       for order in orders:
-          if self.ready:
-            self.dispatchorder(order)
-
+          # if self.ready:
+          print ('Dispatching order')
+          self.dispatchorder(order)
+          print ('Dispatched order')
+      
+        
     def dispatchorder(self, cart):
 
         print(cart)
@@ -58,9 +62,11 @@ class OrderDispatcher():
             producer.close()        
 
     def getorders(self):
+      print ('Executing getorders')
       ordersurl = self.ordersurl
       resp = requests.get(ordersurl)
       ordereditems = json.loads(resp.text)
+      print ('returning ordereditems')
       return ordereditems
             
 def main(args=None):
@@ -73,7 +79,6 @@ def main(args=None):
       print('After dispatchorders')
     except (KeyboardInterrupt):
         pass
-
 
 if __name__ == '__main__':
     main()    
