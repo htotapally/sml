@@ -7,6 +7,6 @@ RUN pip install -r requirements.txt
 
 COPY webserver.py webserver.py
 COPY productsvc.py productsvc.py
-COPY webserver.conf webserver.conf
-COPY docs.json docs.json
+COPY webserver.conf /config/webserver.conf
+COPY docs.json /products/docs.json
 ENTRYPOINT ["python3", "webserver.py"]

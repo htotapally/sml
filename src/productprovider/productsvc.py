@@ -6,7 +6,7 @@ import requests
 class ProductSvc:
     
     def __init__(self):
-        demof = os.path.join(os.path.dirname(__file__), 'docs.json')        
+        demof = os.path.join(os.path.dirname(__file__), '/products/docs.json')        
         f = open(demof)
         self.docs = f.read()        
         pass

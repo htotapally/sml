@@ -60,7 +60,7 @@ class WebServer:
         print (price)
         return str(price)
     
-webserverconf = os.path.join(os.path.dirname(__file__), 'webserver.conf')
+webserverconf = os.path.join(os.path.dirname(__file__), '/config/webserver.conf')
 
 def cors_tool():
     '''
