@@ -2,12 +2,18 @@ Work in progress
 This can be containerised later.
 
 Building docker image
-docker build -t my-postgres-db ./
+docker build -t htotapally/sml-postgres-db ./
 
 Running database
-docker run --name=world -e POSTGRES_PASSWORD=REPLACEM -d -p 5432:5432 --network=host -v postgres_data:/var/lib/postgresql/data postgres
 
-docker run --name posttest -d -p 5432:5432 -e POSTGRES_PASSWORD=fred postgres:alpine
+This works for now
+docker run --name=postgres -e POSTGRES_PASSWORD=<PASSWORD> -e POSTGRES_DB=world-d -p  --network=host htotapally/sml-postgres-db
+
+
+docker run --name=world -e POSTGRES_PASSWORD=<PASSWORD> -d -p 5432:5432 --network=host -v postgres_data:/var/lib/postgresql/data postgres
+
+
+docker run --name=world -e POSTGRES_PASSWORD=<PASSWORD> -d -p 5432:5432 --network=host -v ./init.sql:/docker-entrypoint-initdb.d/init.sql postgres
 
 
 Requirements
