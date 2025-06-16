@@ -6,6 +6,9 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 COPY orderstatusupdater.py orderstatusupdater.py
-COPY dispconf.conf dispconf.conf
+COPY dispconf.conf /config/dispconf.conf
+COPY crontab crontab
 
-ENTRYPOINT ["python3", "orderstatusupdater.py"]
+RUN crontab crontab
+
+CMD ["crond", "-f"]

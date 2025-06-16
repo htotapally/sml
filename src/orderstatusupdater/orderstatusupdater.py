@@ -40,7 +40,7 @@ def consumer_thread(topic, bootstrap_servers, orderupdateurl):
                         
 def main(args=None):
     print("Starting order OrderStatusUpdater!")
-    dispconf = os.path.join(os.path.dirname(__file__), 'dispconf.conf')
+    dispconf = os.path.join(os.path.dirname(__file__), '/config/dispconf.conf')
       
     print (dispconf)
     config = configparser.ConfigParser()
@@ -64,6 +64,6 @@ def main(args=None):
 
     for thread in threads:
         thread.join()
-
+    
 if __name__ == '__main__':
     main()    
