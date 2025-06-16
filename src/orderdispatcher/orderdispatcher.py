@@ -71,7 +71,7 @@ class OrderDispatcher():
             
 def main(args=None):
     print("Starting order dispatcher!")
-    dispconf = os.path.join(os.path.dirname(__file__), 'dispconf.conf')
+    dispconf = os.path.join(os.path.dirname(__file__), '/config/dispconf.conf')
     try:
       print('Within the try block')  
       orderDispatcher = OrderDispatcher(dispconf)

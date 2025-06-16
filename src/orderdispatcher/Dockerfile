@@ -6,7 +6,7 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 COPY orderdispatcher.py orderdispatcher.py
-COPY dispconf.conf dispconf.conf
+COPY dispconf.conf /config/dispconf.conf
 COPY crontab crontab
 
 RUN crontab crontab
