@@ -8,7 +8,7 @@ RUN pip install -r requirements.txt
 
 COPY webserver.py webserver.py
 COPY ordersvc.py ordersvc.py
-COPY webserver.conf webserver.conf
-COPY ordsvc.conf ordsvc.conf
+COPY webserver.conf /config/webserver.conf
+COPY ordsvc.conf /config/ordsvc.conf
 
 ENTRYPOINT ["python3", "webserver.py"]

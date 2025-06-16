@@ -116,12 +116,7 @@ class WebServer:
         config.read(ordsvcconf)
         orderSvc = OrderSvc(config)
         return orderSvc
-         
-    
-webserverconf = os.path.join(os.path.dirname(__file__), 'webserver.conf')
-ordsvcconf = os.path.join(os.path.dirname(__file__), 'ordsvc.conf')
-
-
+             
 def calculate_order_amount(items):
     # Replace this constant with a calculation of the order's amount
     # Calculate the order total on the server to prevent
@@ -171,6 +166,9 @@ def cors_tool():
         if cherrypy.request.config.get('tools.sessions.on', False):
             cherrypy.session['token'] = True
         return True
+
+webserverconf = os.path.join(os.path.dirname(__file__), '/config/webserver.conf')
+ordsvcconf = os.path.join(os.path.dirname(__file__), '/config/ordsvc.conf')
     
 def main():
     cherrypy_cors.install()
