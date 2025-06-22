@@ -122,7 +122,7 @@ function executesearch() {
     }
   };
 
-  xhttp.open("GET", "http://localhost/cp/get_item?itemId=" + searchtext, true);
+  xhttp.open("GET", "/cp/get_item?itemId=" + searchtext, true);
   xhttp.send();
 }
 
@@ -149,7 +149,7 @@ function placeorder() {
   };
 
   x = JSON.stringify(Object.fromEntries(cart));
-  xhttp.open("POST", "http://localhost/cp/placeorder?cart=" + x, true);
+  xhttp.open("POST", "/cp/placeorder?cart=" + x, true);
   xhttp.send();
 }
 
@@ -232,7 +232,7 @@ function loadDoc() {
     }
   }
 
-  xhttp.open("GET", "http://localhost/cp/get_allitems", true);
+  xhttp.open("GET", "/cp/get_allitems", true);
   xhttp.send();
 }
 
