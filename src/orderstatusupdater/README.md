@@ -1,10 +1,10 @@
-Update connection info in orderdispatcher.py
+Update connection info in orderstatusupdater.py  
 
-Bulding docker image
-sudo docker build -t orderdispatcher .
+Bulding docker image  
+sudo docker build -t htotapally/orderstatusupdater .
 
 Running docker image
-sudo docker run --name orderdispatcher --network host orderdispatcher
+sudo docker run --name orderstatusupdater --network host orderstatusupdater
 
 Viewing docker logs
-sudo docker logs orderdispatcher
+sudo docker logs orderstatusupdater
