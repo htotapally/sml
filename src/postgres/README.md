@@ -1,24 +1,39 @@
-Work in progress
-This can be containerised later.
+# Work in progress
 
-Building docker image
+## Building docker image
+```
 docker build -t htotapally/sml-postgres-db ./
+```
 
-Running database
+## Running database
 
 This works for now
-docker run --name=postgres -e POSTGRES_PASSWORD=<PASSWORD> -e POSTGRES_DB=world-d -p  --network=host htotapally/sml-postgres-db
+```
+docker run --name=postgres -e POSTGRES_PASSWORD=<PASSWORD> -e POSTGRES_DB=world -d -p 5432:5432 --network=host -v postgres_data:/var/lib/postgresql/data  --network=host htotapally/sml-postgres-db
+```
 
-
+MORE WORK IS NEEDED FOR THE FOLLOWING  
+```
 docker run --name=world -e POSTGRES_PASSWORD=<PASSWORD> -d -p 5432:5432 --network=host -v postgres_data:/var/lib/postgresql/data postgres
 
 
 docker run --name=world -e POSTGRES_PASSWORD=<PASSWORD> -d -p 5432:5432 --network=host -v ./init.sql:/docker-entrypoint-initdb.d/init.sql postgres
+```
+
+## Requirements
+Pre create database, and tables as needed.
+
+## Connecting to postgres
+When postgres is installed on a standlaone host  
+```
+psql -h localhost -p 5432 -U postgres
+```
+When using docker  
 
 
-Requirements
-Create database, template1.
 CREATE DATABASE world;
+
+
 
 Enable remote connections
 Update the following lines pg_hba.conf
@@ -46,8 +61,6 @@ CREATE TABLE onlineorders (
     Status TEXT NOT NULL DEFAULT 'Created'
 );
 
-Connecting to postgres
-psql -h localhost -p 5432 -U postgres
 
 SHOW data_directory;
 
