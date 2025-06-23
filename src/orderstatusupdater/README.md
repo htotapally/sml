@@ -1,10 +1,16 @@
 Update connection info in orderstatusupdater.py  
 
-Bulding docker image  
-sudo docker build -t htotapally/orderstatusupdater .
+## Bulding docker image  
+```
+docker build -t htotapally/orderstatusupdater .
+```
 
-Running docker image
-sudo docker run --name orderstatusupdater --network host orderstatusupdater
+## Running docker image
+```
+docker run --name orderstatusupdater --network host orderstatusupdater
+```
 
-Viewing docker logs
-sudo docker logs orderstatusupdater
+## Viewing docker logs
+```
+docker logs orderstatusupdater
+```
