@@ -22,19 +22,24 @@ colcon build
 The build would create the necessary packages to run delivery automation code.
 ```
 
+# Order Procesing Automation
+
+## orderdispatcher
+
+## orderstatusupdater  
+
 ## kafka  
 configured with the required topics.  This will be moved into its own docker later  
 
 ## Open Telemetry  
 
 
-# Web Related  
+# Web Related 
+All use docker images  
 ## postgres  
 configured with a starter database, and configured for network access.  This will be moved into its own docker container later
 
 ## haproxy  
-
-## orderdispatcher
 
 ## orderservice  
 
