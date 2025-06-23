@@ -1,19 +1,26 @@
-Building docker image
-sudo docker build -t haproxy .
+# Building docker image  
+```
+docker build -t htotapally/haproxy .  
+```  
+## Running haproxy docker image  
+```
+docker run -d --name haproxy -p 80:80 -p 8404:8404 htotapally/haproxy
+```
 
-Running haproxy docker image 
-sudo docker run -d --name haproxy -p 80:80 -p 8404:8404 haproxy
+## Stopping haproxy docker image  
+```
+docker stop haproxy
+```
 
-Stopping haproxy docker image
-sudo docker stop haproxy
+## Removing haproxy docker container  
+```
+docker rm haproxy
+```
 
-removing haproxy docker container
-sudo docker rm haproxy
+## Proxy configuration file  
+haproxy.cfg, self explanatory  
 
-Proxy file
-haproxy.cfg, self explanatory
-
-Reference Documentation
+Reference Documentation  
 https://www.haproxy.com/blog/how-to-run-haproxy-with-docker
 
 
