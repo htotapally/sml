@@ -1,25 +1,26 @@
-Work in progress
-Decoupled Web, and Order Delivery Automation related projects, developed in python
+# Work in progress
+Decoupled Web, and Order Delivery Automation related projects, developed in python  
 
-Order Delivery Automation Related 
-Requirements: ROS2 development environment is setup
+# Order Delivery Automation Related  
+Requirements: ROS2 development environment is setup  
 
-Directory structure
-ord_srvcli
-ord_srvcli_interfaces
-ord_srv_mgr
+## Directory structure  
+1. ord_srvcli  
+1. ord_srvcli_interfaces  
+1. ord_srv_mgr  
 
-Building ROS packages
-Checkout the folders
-ord_srvcli
-ord_srvcli_interfaces
-ord_srv_mgr 
-into <ROS Workspace>/src
-from a terminal, change working directory to <ROS Workspace>
-Run the build command:
+## Building ROS packages  
+Checkout the folders  
+ord_srvcli  
+ord_srvcli_interfaces  
+ord_srv_mgr  
+into <ROS Workspace>/src  
+from a terminal, change working directory to <ROS Workspace>  
+Run the build command:  
+```
 colcon build
 The build would create the necessary packages to run delivery automation code.
-
+```
 
 
 kafka
