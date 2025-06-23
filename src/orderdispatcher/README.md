@@ -1,10 +1,15 @@
-Update dispconf.conf with environment specific values
+## Bulding docker image  
+Update dispconf.conf with environment specific values  
+```
+docker build -t htotapally/orderdispatcher .  
+```
 
-Bulding docker image
-sudo docker build -t orderdispatcher .
+## Running docker image  
+```
+docker run --name htotapally/orderdispatcher --network host orderdispatcher
+```
 
-Running docker image
-sudo docker run --name orderdispatcher --network host orderdispatcher
-
-Viewing docker logs
-sudo docker logs orderdispatcher
+## Viewing docker logs  
+```
+docker logs orderdispatcher
+```
