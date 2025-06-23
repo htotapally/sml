@@ -1,19 +1,22 @@
-Build docker container for static content
-
-Datastore for products
+## Datastore for products
 Products are currently provided based on the file docs.json.  For updating the inventory update docs.json
 
+## Building Docker image  
+```
+docker build -t htotapally/prodprovider .
+```
 
-Building Docker image
+## Running Docker  
+```
+docker run --name prodprovider -d -p 8080:8080 htotapally/prodprovider
+```
 
-
-sudo docker build -t prodprovider .
-
-Running Docker
-sudo docker run --name prodprovider -d -p 8080:8080 prodprovider
-
-Accessing the services directly
+## Accessing the services directly  
+```
 http://locahost:8080/
+```
 
-Viewing docker logs
-sudo docker logs prodprovider
+## Viewing docker logs
+```
+docker logs prodprovider
+```
