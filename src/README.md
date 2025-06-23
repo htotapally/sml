@@ -22,45 +22,36 @@ colcon build
 The build would create the necessary packages to run delivery automation code.
 ```
 
+## kafka  
+configured with the required topics.  This will be moved into its own docker later  
 
-kafka
-configured with the required topics.  This will be moved into its own docker later
+## Open Telemetry  
 
-Web Related
-postgres
+
+# Web Related  
+## postgres  
 configured with a starter database, and configured for network access.  This will be moved into its own docker container later
 
-haproxy
+## haproxy  
 
-kafka
+## orderdispatcher
 
-orderdispatcher
+## orderservice  
 
-orderservice
+## productprovider  
 
-postgres
+# Buliding for development purposes  
 
-productprovider
+Each directory has README.md file. Follow instructions for building and running images/apps  
 
-Buliding for development purposes
+For running web components run the following docker images:  
+haproxy  
+kafka  
+orderdispatcher  
+orderservice  
+postgres  
+productprovider  
+otel  
 
-Each directory has README.md file. Follow instructions for building and running images/apps
-
-For running web components run the following docker images:
-haproxy
-
-kafka
-
-orderdispatcher
-
-orderservice
-
-postgres
-
-productprovider
-
-Once all docker images are run, and docker containers are created and up an running the web front is accessible using the url http://localhost/
-
-
-
+Once all docker images are run, and docker containers are created and up an running the web front is accessible using the url http://localhost/  
 
