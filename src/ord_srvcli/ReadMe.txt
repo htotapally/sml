@@ -1,3 +1,5 @@
+# This is running notes.  should not be used
+
 cd ~/ros2_ws
 colcon build --packages-select py_srvcli_interface
 colcon build --packages-select py_srvcli
