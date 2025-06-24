@@ -9,7 +9,7 @@ docker build -t htotapally/sml-postgres-db ./
 
 This works for now
 ```
-docker run --name=postgres -e POSTGRES_PASSWORD=<PASSWORD> -e POSTGRES_DB=world -d -p 5432:5432 --network=host -v postgres_data:/var/lib/postgresql/data  --network=host htotapally/sml-postgres-db
+docker run --name=postgres -e POSTGRES_PASSWORD=<PASSWORD> -e POSTGRES_DB=world -d -p 5432:5432 --network=host -v postgres_data:/var/lib/postgresql/data htotapally/sml-postgres-db
 ```
 
 MORE WORK IS NEEDED FOR THE FOLLOWING  
