@@ -33,37 +33,26 @@ class ProductSvc:
     
     @cherrypy.expose
     @cherrypy.tools.json_out()    
-    def getitem(self, itemId):
+    def getitem(self, searchText):
         with tracer.start_as_current_span("SearchSpan"):
             with tracer.start_as_current_span("SearchByFilterSpan") as parent_span:
                 parent_span.add_event("Searching by filter.", {
                     "message_type": "info",
-                    "ItemId": itemId
+                    "SearchText": searchText
                 })
-                        
-        itemFiltered = None
-        resp = requests.get(solrUrl.format(self.solrendpoint, self.solrcollection))
+
+        filter = filterUrl.format(self.solrendpoint, self.solrcollection, searchText)               
+        print(filter)
+        resp = requests.get(filter)
         data = json.loads(resp.text)
         docs = data.get('response').get('docs')
+        return docs
         
-        for doc in docs:
-          match = False
-          print(doc.get('items.itemId'), end=" ")
-          print(itemId)
-          print(doc.get('items.itemId') == itemId)
-          if (itemId in doc.get('items.itemId')):
-                itemFiltered = doc
-                match = True
-                break
-            
-          if match:  
-            break
-          else:
-            continue
-        
-        return itemFiltered
 
 solrUrl = '{}/{}/select?indent=true&q.op=OR&q=*%3A*&useParams='
+# filterUrl = '{}/{}/select?fq=detailedDescription%3A{searchtext}&fq=productName%3A{searchtext}&fq=usageInstructions%3A{searchtext}&indent=true&q.op=OR&q=brand%3A{searchtext}*&useParams='
+filterUrl = '{}/{}/select?debugQuery=false&indent=true&q.op=OR&q=detailedDescription%3A{}*&useParams='
+
 provider = TracerProvider(
   resource = Resource.create({SERVICE_NAME: "ProductProviderService"})
 )
