@@ -29,6 +29,13 @@ import configparser
 
 from itertools import product
 
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.trace.export import ConsoleSpanExporter
+
 from ordersvc import OrderSvc
 
 class WebServer:
@@ -104,6 +111,13 @@ class WebServer:
             )
             print(intent['client_secret'])
             
+            with tracer.start_as_current_span("OrderServiceSpan"):
+                with tracer.start_as_current_span("CreatePaymentIntentSpan") as parent_span:
+                    parent_span.add_event("Stripe clientsecret", {
+                        "message_type": "info",
+                        "ClientSecret": intent['client_secret']
+                    })
+                                
             self.placeorder(body)    
             return {'clientSecret': intent['client_secret']}
         except Exception as e:
@@ -169,7 +183,34 @@ def cors_tool():
 
 webserverconf = os.path.join(os.path.dirname(__file__), '/config/webserver.conf')
 ordsvcconf = os.path.join(os.path.dirname(__file__), '/config/ordsvc.conf')
-    
+
+provider = TracerProvider(
+  resource = Resource.create({SERVICE_NAME: "OrderServiceWeb"})
+)
+
+processor = BatchSpanProcessor(ConsoleSpanExporter())
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+tracer = trace.get_tracer(__name__)
+
+otlp_exporter = OTLPSpanExporter(                                                 
+  endpoint = "http://192.168.1.170:4318/v1/traces"                                  
+)                                                                                   
+                                                                                    
+if os.path.exists(ordsvcconf):
+    print("Recreating the exporter")                                                
+    config = configparser.ConfigParser()                                            
+    config.read(ordsvcconf)
+    oltpExporterEndpoint = config.get('OTLPSpanExporter', 'oltpExporterEndpoint')   
+    print(oltpExporterEndpoint)                                                     
+    otlp_exporter = OTLPSpanExporter(                                             
+        endpoint = oltpExporterEndpoint                                             
+    )
+
+trace.get_tracer_provider().add_span_processor(
+   BatchSpanProcessor(otlp_exporter)
+)
+
 def main():
     cherrypy_cors.install()
     config = configparser.ConfigParser()

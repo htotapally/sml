@@ -5,3 +5,8 @@ requests
 urllib3
 psycopg2
 stripe
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-prometheus
+opentelemetry-exporter-otlp-proto-http
+opentelemetry-instrumentation-requests

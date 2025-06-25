@@ -1,7 +1,15 @@
 import psycopg2
 import uuid
 import json
+import os.path
 import configparser
+
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.trace.export import ConsoleSpanExporter
 
 class OrderSvc:
     def __init__(self, config):
@@ -52,14 +60,19 @@ class OrderSvc:
       return ordereditems
   
     def placeorder(self, cart):
-
         dict = json.loads(cart)
-        
         itemids = dict.keys()
         itemsordered = []
         orderid = uuid.uuid4()
         conn = self.getconn()
 
+        with tracer.start_as_current_span("OrderServiceSpan"):
+            with tracer.start_as_current_span("CreateOrderSpan") as parent_span:
+                parent_span.add_event("Creating new order.", {
+                    "message_type": "info",
+                    "OrderId": orderid
+                })
+                        
         with conn:
           for itemid in itemids:
             lineitems = dict[itemid]
@@ -151,3 +164,33 @@ def saleprice(regular, promo):
       m = regular
       
     return m
+
+provider = TracerProvider(
+  resource = Resource.create({SERVICE_NAME: "OrderService"})
+)
+
+processor = BatchSpanProcessor(ConsoleSpanExporter())
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+tracer = trace.get_tracer(__name__)
+
+otlp_exporter = OTLPSpanExporter(                                                 
+  endpoint = "http://192.168.1.170:4318/v1/traces"                                  
+)                                                                                   
+
+confpath = os.path.join(os.path.dirname(__file__), '/config/ordsvc.conf')
+print(confpath)
+                                                                                    
+if os.path.exists(confpath):                
+    print("Recreating the exporter")                                                
+    config = configparser.ConfigParser()                                            
+    config.read(confpath)
+    oltpExporterEndpoint = config.get('OTLPSpanExporter', 'oltpExporterEndpoint')   
+    print(oltpExporterEndpoint)                                                     
+    otlp_exporter = OTLPSpanExporter(                                             
+        endpoint = oltpExporterEndpoint                                             
+    )
+
+trace.get_tracer_provider().add_span_processor(
+   BatchSpanProcessor(otlp_exporter)
+)
