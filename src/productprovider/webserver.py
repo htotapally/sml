@@ -31,8 +31,10 @@ from productsvc import ProductSvc
 class WebServer:
     """Rest services for order processing."""
     
-    def __init__(self):
-      super().__init__()      
+    def __init__(self, solrendpoint, solrcollection):
+      super().__init__()
+      self.solrendpoint = solrendpoint
+      self.solrcollection = solrcollection      
 
     @cherrypy.expose
     def index(self):
@@ -42,15 +44,16 @@ class WebServer:
     @cherrypy.tools.json_out()
     def get_allitems(self):
         cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
-        productsvc = ProductSvc()
+        productsvc = ProductSvc(self.solrendpoint, self.solrcollection)
         return productsvc.get_allitems()
     
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def get_item(self, itemId = 'PB000005-100G'):
-        productsvc = ProductSvc()
+        productsvc = ProductSvc(self.solrendpoint, self.solrcollection)
         return productsvc.getitem(itemId)
     
+    '''
     @cherrypy.expose
     def get_price(self, itemId = 'PB000005-100G'):
         item = getitem(self.couchurl, itemId)
@@ -59,9 +62,8 @@ class WebServer:
         price = saleprice(item)
         print (price)
         return str(price)
+    '''
     
-webserverconf = os.path.join(os.path.dirname(__file__), '/config/webserver.conf')
-
 def cors_tool():
     '''
     Handle both simple and complex CORS requests
@@ -108,18 +110,27 @@ def cors_tool():
     
 def main():
     cherrypy_cors.install()
-    print (webserverconf)
-    config = configparser.ConfigParser()
-    config.read(webserverconf)
-    port = config.getint('global', 'server.socket_port')
-    print(port)
-    host = config.get('global', 'server.socket_host')
-    print (host)
-    cherrypy.config.update({'server.socket_port': port, 'server.socket_host': host, 'tools.CORS.on': True })
+    confpath = os.path.join(os.path.dirname(__file__), '/config/webserver.conf')
+    print (confpath)
+
+    port = 9080
+    host = 'localhost'
+
+    solrendpoint = 'http://192.168.1.170:8983/solr'
+    solrcollection = 'sml1'
     
-    cherrypy.tools.CORS = cherrypy.Tool('before_handler', cors_tool)    
-    cherrypy.quickstart(WebServer())
-    # cherrypy.quickstart(WebServer(), config)
+    if os.path.exists(confpath):
+        config = configparser.ConfigParser()
+        config.read(confpath)
+        port = config.getint('global', 'server.socket_port')
+        host = config.get('global', 'server.socket_host')
+        solrendpoint = config.get('solr', 'solr.endpoint')
+        solrcollection = config.get('solr', 'solr.collection')
+            
+    cherrypy.config.update({'server.socket_port': port, 'server.socket_host': host, 'tools.CORS.on': True })    
+    cherrypy.tools.CORS = cherrypy.Tool('before_handler', cors_tool)
+    
+    cherrypy.quickstart(WebServer(solrendpoint, solrcollection))
     
 if __name__ == '__main__':
     # CherryPy always starts with app.root when trying to map request URIs
