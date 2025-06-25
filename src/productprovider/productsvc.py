@@ -41,17 +41,37 @@ class ProductSvc:
                     "SearchText": searchText
                 })
 
-        filter = filterUrl.format(self.solrendpoint, self.solrcollection, searchText)               
+
+        filterQuery = '&' + allFieldsFilter('detailedDescription', searchText)
+        print(filterQuery)
+
+        filter = filterUrl.format(self.solrendpoint, self.solrcollection, filterQuery)               
         print(filter)
         resp = requests.get(filter)
         data = json.loads(resp.text)
         docs = data.get('response').get('docs')
         return docs
         
+def createFilter(queryField, searchText):
+    query = '&q.op=OR&q={}%3A{}*'
+    return query.format(queryField, searchText)
 
+def detailedDescriptionFilter(searchText):
+    query = 'q=detailedDescription:{}*'
+    return query.format(searchText)
+
+def allFieldsFilter(brand, searchText):
+    query = 'q={}:{}*'
+    return query.format(brand, searchText)
+
+def operationFilter():
+    query = 'q.op=OR'  
+    return query
+# used for getting allitems
 solrUrl = '{}/{}/select?indent=true&q.op=OR&q=*%3A*&useParams='
-# filterUrl = '{}/{}/select?fq=detailedDescription%3A{searchtext}&fq=productName%3A{searchtext}&fq=usageInstructions%3A{searchtext}&indent=true&q.op=OR&q=brand%3A{searchtext}*&useParams='
-filterUrl = '{}/{}/select?debugQuery=false&indent=true&q.op=OR&q=detailedDescription%3A{}*&useParams='
+
+# used for filtering based on search text across multiple fields
+filterUrl = '{}/{}/select?debugQuery=false&indent=true&q.op=OR{}&useParams='
 
 provider = TracerProvider(
   resource = Resource.create({SERVICE_NAME: "ProductProviderService"})
