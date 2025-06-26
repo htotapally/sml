@@ -55,7 +55,6 @@ function displaycart() {
       document.getElementById("content").innerHTML = this.responseText;
       
       displaypayment();
-  
 
       cartTotal = calculatetotal();
 
@@ -102,6 +101,15 @@ function executesearch() {
   const element = document.getElementById('searchtext');
   const searchtext = element.value;
 
+  const brand = document.getElementById('brand');
+  const brandtext = brand.value;
+
+  const productName = document.getElementById('productName');
+  const productNametext = productName.value;
+  
+  const productId = document.getElementById('productId');
+  const productIdtext = productId.value;
+
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -122,7 +130,7 @@ function executesearch() {
     }
   };
 
-  xhttp.open("GET", "/cp/get_item?itemId=" + searchtext, true);
+  xhttp.open("GET", "/cp/get_item?itemId=" + searchtext + "&brand=" + brandtext + "&productName=" + productNametext + "&productId=" + productIdtext,  true);
   xhttp.send();
 }
 
