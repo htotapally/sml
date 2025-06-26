@@ -130,7 +130,7 @@ function executesearch() {
     }
   };
 
-  xhttp.open("GET", "/cp/get_item?itemId=" + searchtext + "&brand=" + brandtext + "&productName=" + productNametext + "&productId=" + productIdtext,  true);
+  xhttp.open("GET", "/cp/get_item?itemId=" + searchtext + "&brand=" + brandtext + "&productName=" + encodeURIComponent(productNametext) + "&productId=" + productIdtext,  true);
   xhttp.send();
 }
 
