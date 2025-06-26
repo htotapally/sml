@@ -3,6 +3,7 @@ import json
 import os.path
 import configparser
 import requests
+import urllib.parse
 
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -63,9 +64,10 @@ class ProductSvc:
         
 def createFilter(queryField, searchText):
     if ' ' in searchText:
-      query = 'q.op=AND&fq={}%3A({})*'
+      query = 'q.op=AND&fq={}%3A(' + searchText + '*)'
     else:
       query = 'q.op=AND&fq={}%3A{}*'
+
     return query.format(queryField, searchText)
 
 def detailedDescriptionFilter(searchText):
