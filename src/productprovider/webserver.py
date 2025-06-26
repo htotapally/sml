@@ -49,9 +49,9 @@ class WebServer:
     
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def get_item(self, itemId = 'PB000005-100G'):
+    def get_item(self, itemId = '', brand = '',  productName = '', productId = ''):
         productsvc = ProductSvc(self.solrendpoint, self.solrcollection)
-        return productsvc.getitem(itemId)
+        return productsvc.getitem(itemId, brand,  productName, productId)
     
     '''
     @cherrypy.expose
