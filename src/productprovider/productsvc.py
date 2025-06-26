@@ -33,7 +33,7 @@ class ProductSvc:
     
     @cherrypy.expose
     @cherrypy.tools.json_out()    
-    def getitem(self, searchText):
+    def getitem(self, searchText = '', brand = '', productName = '', productId = ''):
         with tracer.start_as_current_span("SearchSpan"):
             with tracer.start_as_current_span("SearchByFilterSpan") as parent_span:
                 parent_span.add_event("Searching by filter.", {
@@ -45,6 +45,15 @@ class ProductSvc:
         filterQuery = '&' + allFieldsFilter('detailedDescription', searchText)
         print(filterQuery)
 
+        filterQuery = filterQuery + '&' + createFilter('brand', brand)
+        print(filterQuery)
+
+        filterQuery = filterQuery + '&' + createFilter('productName', productName)
+        print(filterQuery)
+
+        filterQuery = filterQuery + '&' + createFilter('productId', productId)
+        print(filterQuery)
+
         filter = filterUrl.format(self.solrendpoint, self.solrcollection, filterQuery)               
         print(filter)
         resp = requests.get(filter)
@@ -53,7 +62,10 @@ class ProductSvc:
         return docs
         
 def createFilter(queryField, searchText):
-    query = '&q.op=OR&q={}%3A{}*'
+    if ' ' in searchText:
+      query = 'q.op=AND&fq={}%3A({})*'
+    else:
+      query = 'q.op=AND&fq={}%3A{}*'
     return query.format(queryField, searchText)
 
 def detailedDescriptionFilter(searchText):
@@ -67,6 +79,7 @@ def allFieldsFilter(brand, searchText):
 def operationFilter():
     query = 'q.op=OR'  
     return query
+
 # used for getting allitems
 solrUrl = '{}/{}/select?indent=true&q.op=OR&q=*%3A*&useParams='
 
