@@ -579,22 +579,24 @@
   <dynamicField name="*_t" type="text_general" multiValued="false" indexed="true" stored="true"/>
   <dynamicField name="*_p" type="location" indexed="true" stored="true"/>
   <copyField source="images.sizes.url" dest="images.sizes.url_str" maxChars="256"/>
+
   <copyField source="allergenInformation" dest="allergenInformation_str" maxChars="256"/>
   <copyField source="dietaryInformation" dest="dietaryInformation_str" maxChars="256"/>
   <copyField source="items.itemId" dest="items.itemId_str" maxChars="256"/>
-  <copyField source="productId" dest="productId_str" maxChars="256"/>
+  <copyField source="productId" dest="all_str"/>
+  <copyField source="upc" dest="all_str"/>
   <copyField source="images.perspective" dest="images.perspective_str" maxChars="256"/>
   <copyField source="temperatureRequirements.indicator" dest="temperatureRequirements.indicator_str" maxChars="256"/>
   <copyField source="usageInstructions" multiValued="false" dest="usageInstructions_str" maxChars="256"/>
-  <copyField source="productName" dest="productName_str" maxChars="256"/>
+  <copyField source="productName" dest="all_str"/>
   <copyField source="items.price.currency" dest="items.price.currency_str" maxChars="256"/>
-  <copyField source="detailedDescription" dest="detailedDescription_str" maxChars="256"/>
+  <copyField source="detailedDescription" dest="all_str"/>
   <copyField source="items.size" dest="items.size_str" maxChars="256"/>
   <copyField source="ingredients" dest="ingredients_str" maxChars="256"/>
   <copyField source="items.inventory.stockLevel" dest="items.inventory.stockLevel_str" maxChars="256"/>
   <copyField source="categories" dest="categories_str" maxChars="256"/>
-  <copyField source="countryOfOrigin" multiValued="false" dest="countryOfOrigin_str" maxChars="256"/>
-  <copyField source="brand" dest="brand_str" maxChars="256"/>
+  <copyField source="countryOfOrigin" multiValued="false" dest="all_str"/>
+  <copyField source="brand" dest="all_str"/>
   <copyField source="items.currency" dest="items.currency_str" maxChars="256"/>
   <copyField source="images.sizes.size" dest="images.sizes.size_str" maxChars="256"/>
   <copyField source="delete" dest="delete_str" maxChars="256"/>
@@ -614,5 +616,6 @@
   <copyField source="doc.images.perspective" dest="doc.images.perspective_str" maxChars="256"/>
   <copyField source="doc.items.size" dest="doc.items.size_str" maxChars="256"/>
   <copyField source="doc.ingredients" dest="doc.ingredients_str" maxChars="256"/>
-  <copyField source="doc.items.itemId" dest="doc.items.itemId_str" maxChars="256"/>
+  <copyField source="doc.items.itemId" dest="all_str"/>
+
 </schema>
