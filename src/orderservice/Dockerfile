@@ -10,6 +10,7 @@ COPY webserver.py webserver.py
 COPY ordersvc.py ordersvc.py
 COPY base.py base.py
 COPY onlineorder.py onlineorder.py
+COPY orderdetails.py orderdetails.py
 COPY webserver.conf /config/webserver.conf
 COPY ordsvc.conf /config/ordsvc.conf
 

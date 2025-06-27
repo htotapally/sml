@@ -7,17 +7,23 @@ from sqlalchemy_serializer import SerializerMixin
 
 from base import Base
 
-class OnlineOrder(Base, SerializerMixin):
-  __tablename__ = 'onlineorders'
+class OrderDetails(Base, SerializerMixin):
+  __tablename__ = 'orderdetails'
 
   id = Column(Integer, primary_key=True)
   createtime = Column(Date)
   orderid = Column(Uuid)
+  itemid = Column(String)
+  qty = Column(Integer, primary_key=False)
+  saleprice = Column(Float)
   status = Column(String)
 
 
-  def __init__(self, createtime, orderid, status):
+  def __init__(self, createtime, orderid, itemid, qty, saleprice, status):
     self.createtime = createtime
     self.orderid = orderid
+    self.itemid = itemid
+    self.qty = qty
+    self.saleprice = saleprice
     self.status = status
 

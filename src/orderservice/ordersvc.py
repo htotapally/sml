@@ -14,6 +14,7 @@ from opentelemetry.sdk.trace.export import ConsoleSpanExporter
 
 from base import Session, engine, Base
 from onlineorder import OnlineOrder
+from orderdetails import OrderDetails
 
 class OrderSvc:
     def __init__(self, config):
@@ -38,22 +39,15 @@ class OrderSvc:
       return ordereditems
       
     def getorder(self, orderid):
-      conn = self.getconn()
-      with conn:
-        cur = conn.cursor()
-        qry = """
-            select to_json (json_build_object('id', id, 'createtime', createtime,'orderid', orderid,'itemid', itemid,'qty', qty,'saleprice', saleprice)) FROM onlineorders
-        """
-        
-        qry = f"{qry} where orderid='{orderid}';"
-        print (qry)
-        
-        cur.execute(qry)
-        rows = cur.fetchall()
-        ordereditems = []
-        for row in rows:
-          print(row[0])
-          ordereditems.append(row[0])
+      session = Session()
+      print(orderid)
+      x = str(orderid)
+      orderdetails = session.query(OrderDetails).filter_by(orderid=orderid).all()
+
+      ordereditems = []
+      for details in orderdetails:
+          print(details)
+          ordereditems.append(details.to_dict())
 
       return ordereditems
   
@@ -74,6 +68,9 @@ class OrderSvc:
 
         session = Session()
   
+        onlineorder = OnlineOrder(current_dt, str(orderid), 'Created')
+        session.add(onlineorder)
+
         for itemid in itemids:
             lineitems = dict[itemid]
             lineitem = json.loads(json.dumps(lineitems))
@@ -85,10 +82,9 @@ class OrderSvc:
             sale = saleprice(regprice, promoprice)
             itemOrdered = [productId, qty, sale];
 
-            onlineorder = OnlineOrder(current_dt, str(orderid), productId, qty, float(sale), 'Created')
-            session.add(onlineorder)
+            orderdetails = OrderDetails(current_dt, str(orderid), productId, qty, float(sale), 'Created')
+            session.add(orderdetails)
 
-            # sql_query = f"INSERT INTO onlineorders (OrderId, ItemId, Qty, SalePrice) VALUES ('{orderid}', '{productId}', {qty}, {float(sale)});"
  
         session.commit()
         session.close()
