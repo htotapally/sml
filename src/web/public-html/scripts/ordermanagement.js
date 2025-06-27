@@ -31,7 +31,7 @@ function fetchorders() {
 
       if (data.length > 0) {
         // Render the data in tabular format
-        var docs = convertOrderItemToRenderable(data);
+        var docs = convertOrderToRenderable(data);
         // Render the table
         const container = document.getElementById('table-container');
         container.innerHTML = '';
@@ -41,7 +41,7 @@ function fetchorders() {
     }
   };
 
-  xhttp.open("GET", "http://localhost/os/getorders", true);
+  xhttp.open("GET", "/os/getorders", true);
   xhttp.send();
 }
 
@@ -60,6 +60,21 @@ function generateOrderTable(data, addqty = true, adddeletebtn = false) {
   
   return table;
 }
+
+function convertOrderToRenderable(items) {
+  var docs = [];
+  index = 0;
+  for (let j = 0; j < items.length; j++) {
+    docs[index] = {};
+    doc = items[j];
+    docs[index]["Id"] = doc["id"]
+    docs[index]["OrderId"] = doc["orderid"];
+    docs[index]["Status"] = doc["status"]
+    index++; 
+  }
+      
+  return docs;
+}     
 
 function convertOrderItemToRenderable(items) {
   var docs = [];
@@ -99,31 +114,11 @@ function createorderrow(item, keys, addqty = true, adddeletebtn = false) {
   keys.forEach(key => {
     const td = document.createElement('td');
     td.textContent = item[key] || ""; // Fill empty fields with blank
-    if (key == "Regular Price" || key == "Promotional Price" || key == "Sale Price") {
-      td.style.textAlign = 'right';
-    }
-
     if (key == "OrderId") {
-      // hr = createhref(item["OrderId"]);
       td.innerHTML = "<a href=# onclick=javascript:check('" + item["OrderId"] +"')>" + item["OrderId"] + "</a>";
     }
     row.appendChild(td);
   });
-
-
-  if (addqty) {
-    const qty = createqty(item);
-    const addBtn = createaddbtn(item, qty);
-    row.appendChild(addBtn);
-    row.appendChild(qty);
-    const subBtn = createsubbtn(item, qty);
-    row.appendChild(subBtn);
-
-    if(adddeletebtn) {
-      const delBtn = createdelbtn(item, qty);
-      row.appendChild(delBtn);
-    }
-  }
 
   return row;
 }
@@ -163,7 +158,7 @@ function fetchorder(orderId) {
         // Render the table
         const container = document.getElementById('table-container');
         container.innerHTML = '';
-        const table = generateOrderTable(docs, false, false);
+        const table = generateOrderDetailTable(docs, false, false);
         if (table) container.appendChild(table);
       }
 
@@ -181,7 +176,7 @@ function fetchorder(orderId) {
     }
   };
 
-  xhttp.open("GET", "http://localhost/os/getorder?orderid=" + orderId, true);
+  xhttp.open("GET", "/os/getorder?orderid=" + orderId, true);
   xhttp.send();
 }
 
@@ -200,7 +195,7 @@ function acknowledge(orderId)
     }
   };
 
-  xhttp.open("POST", "http://localhost/os/acknowledge?orderid=" + orderId, true);
+  xhttp.open("POST", "/os/acknowledge?orderid=" + orderId, true);
   xhttp.send();
 }
 
@@ -213,7 +208,73 @@ function complete(orderId)
     }
   };
 
-  xhttp.open("POST", "http://localhost/os/complete?orderid=" + orderId, true);
+  xhttp.open("POST", "/os/complete?orderid=" + orderId, true);
   xhttp.send();
 }
 
+// Function to generate the table
+function generateOrderDetailTable(data, addqty = true, adddeletebtn = false) {
+  if (!data || data.length === 0) return "No data available.";
+  // Create the table element
+  const table = document.createElement('table');
+  const keys = Object.keys(data[0]); // Get keys from the first object
+  const headerRow = createorderheader(keys);
+  table.appendChild(headerRow);
+  const rows = generateorderdetailrows(data, keys, addqty, adddeletebtn);
+  for(const row in rows) {
+    table.appendChild(rows[row]);
+  }
+
+  return table;
+}
+
+function generateorderdetailrows(data, keys, addqty = true, adddeletebtn) {
+  // Generate table rows
+  rows = [];
+  rowindex = 0;
+  data.forEach(item => {
+    const price = getprice(item);
+    if(!priceMap.has(item["Item Id"])) {
+      priceMap.set(item["Item Id"], price);
+    }
+   
+    const row  = createorderdetailrow(item, keys, addqty, adddeletebtn);
+    rows[rowindex++] = row;
+  });
+
+  return rows;
+}
+
+function createorderdetailrow(item, keys, addqty = true, adddeletebtn = false) {
+  const row = document.createElement('tr');
+  keys.forEach(key => {
+    const td = document.createElement('td');
+    td.textContent = item[key] || ""; // Fill empty fields with blank
+    if (key == "Regular Price" || key == "Promotional Price" || key == "Sale Price") {
+      td.style.textAlign = 'right';
+    }
+
+    if (key == "OrderId") {
+      // hr = createhref(item["OrderId"]);
+      td.innerHTML = "<a href=# onclick=javascript:check('" + item["OrderId"] +"')>" + item["OrderId"] + "</a>";
+    }
+    row.appendChild(td);
+  });
+
+
+  if (addqty) {
+    const qty = createqty(item);
+    const addBtn = createaddbtn(item, qty);
+    row.appendChild(addBtn);
+    row.appendChild(qty);
+    const subBtn = createsubbtn(item, qty);
+    row.appendChild(subBtn);
+
+    if(adddeletebtn) {
+      const delBtn = createdelbtn(item, qty);
+      row.appendChild(delBtn);
+    }
+  }
+
+  return row;
+}
