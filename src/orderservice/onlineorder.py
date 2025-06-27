@@ -22,7 +22,7 @@ class OnlineOrder(Base, SerializerMixin):
   def __init__(self, createtime, orderid, itemid, qty, saleprice, status):
     self.createtime = createtime
     self.orderid = orderid
-    self.itemid = itemd
+    self.itemid = itemid
     self.qty = qty
     self.saleprice = saleprice
     self.status = status

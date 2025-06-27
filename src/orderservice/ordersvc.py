@@ -3,6 +3,7 @@ import uuid
 import json
 import os.path
 import configparser
+from datetime import datetime
 
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -62,6 +63,7 @@ class OrderSvc:
         itemsordered = []
         orderid = uuid.uuid4()
         conn = self.getconn()
+        current_dt = datetime.now()
 
         with tracer.start_as_current_span("OrderServiceSpan"):
             with tracer.start_as_current_span("CreateOrderSpan") as parent_span:
@@ -69,9 +71,10 @@ class OrderSvc:
                     "message_type": "info",
                     "OrderId": orderid
                 })
-                        
-        with conn:
-          for itemid in itemids:
+
+        session = Session()
+  
+        for itemid in itemids:
             lineitems = dict[itemid]
             lineitem = json.loads(json.dumps(lineitems))
             qty = lineitem["qty"]
@@ -79,14 +82,16 @@ class OrderSvc:
             productId = product["Item Id"]
             regprice = product["Regular Price"]
             promoprice = product["Promotional Price"]
-            sale = saleprice(regprice, promoprice)            
+            sale = saleprice(regprice, promoprice)
             itemOrdered = [productId, qty, sale];
-            sql_query = f"INSERT INTO onlineorders (OrderId, ItemId, Qty, SalePrice) VALUES ('{orderid}', '{productId}', {qty}, {float(sale)});"
-            cur = conn.cursor()
-            cur.execute(sql_query)
 
-          # Commit the transaction
-          conn.commit()
+            onlineorder = OnlineOrder(current_dt, str(orderid), productId, qty, float(sale), 'Created')
+            session.add(onlineorder)
+
+            # sql_query = f"INSERT INTO onlineorders (OrderId, ItemId, Qty, SalePrice) VALUES ('{orderid}', '{productId}', {qty}, {float(sale)});"
+ 
+        session.commit()
+        session.close()
                       
         return f'Your order has been successfully received. Please provide orderid: <b>{orderid}</b> for any questions'  
 
