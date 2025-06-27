@@ -11,6 +11,9 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter
 
+from base import Session, engine, Base
+from onlineorder import OnlineOrder
+
 class OrderSvc:
     def __init__(self, config):
       # Set postgres configuration
@@ -22,20 +25,14 @@ class OrderSvc:
       pass
         
     def getorders(self):
-      conn = self.getconn()
-      with conn:
-        cur = conn.cursor()
-        qry = """
-            select to_json (json_build_object('id', id, 'createtime', createtime,'orderid', orderid,'itemid', itemid,'qty', qty,'saleprice', saleprice)) FROM onlineorders WHERE status = 'Created';
-        """
-        print (f"{qry}")
-        
-        cur.execute(qry)
-        rows = cur.fetchall()
-        ordereditems = []
-        for row in rows:
-          print(row[0])
-          ordereditems.append(row[0])
+      ordereditems = []
+      session = Session()
+
+      onlineorders = session.query(OnlineOrder).filter_by(status='Created').all()
+      print('Printing onlineorders')
+      for onlineorder in onlineorders:
+        print(onlineorder.to_dict())
+        ordereditems.append(onlineorder.to_dict())
 
       return ordereditems
       
