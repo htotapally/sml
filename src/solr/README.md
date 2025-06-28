@@ -65,6 +65,9 @@ in the Documents text area enter the following text
 Click on Submit Document.  All existing products are removed.
 
 # Creating  custom docker image is Work in Progress
+```
+docker build -t htotapally/smlsolr .
+```
 
 ```  
 docker run -d -v "/var/solr:/var/solr" -p 8983:8983 --name smlsolr solr solr-precreate smlsolr
