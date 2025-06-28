@@ -42,18 +42,8 @@ class ProductSvc:
                     "SearchText": searchText
                 })
 
-
-        filterQuery = '&' + allFieldsFilter('detailedDescription', searchText)
-        print(filterQuery)
-
-        filterQuery = filterQuery + '&' + createFilter('brand', brand)
-        print(filterQuery)
-
-        filterQuery = filterQuery + '&' + createFilter('productName', productName)
-        print(filterQuery)
-
-        filterQuery = filterQuery + '&' + createFilter('productId', productId)
-        print(filterQuery)
+        filterQuery = f'*{searchText}*'
+ 
 
         filter = filterUrl.format(self.solrendpoint, self.solrcollection, filterQuery)               
         print(filter)
@@ -86,7 +76,8 @@ def operationFilter():
 solrUrl = '{}/{}/select?indent=true&q.op=OR&q=*%3A*&useParams='
 
 # used for filtering based on search text across multiple fields
-filterUrl = '{}/{}/select?debugQuery=false&indent=true&q.op=OR{}&useParams='
+# filterUrl = '{}/{}/select?debugQuery=false&indent=true&q.op=OR{}&useParams='
+filterUrl = '{}/{}/select?indent=true&q.op=OR&q=all_str%3A{}&useParams='
 
 provider = TracerProvider(
   resource = Resource.create({SERVICE_NAME: "ProductProviderService"})
