@@ -5,7 +5,7 @@
 docker build -t htotapally/sml-postgres-db ./
 ```
 
-## Running database
+## Manually Running database
 
 This works for now
 ```
