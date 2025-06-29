@@ -4,6 +4,7 @@
 ```
 docker build -t htotapally/sml-postgres-db ./
 ```
+Use docker compose to run the database
 
 ## Manually Running database
 
