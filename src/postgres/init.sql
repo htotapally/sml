@@ -1,5 +1,3 @@
-BEGIN;
-
 
 CREATE TABLE onlineorders (
     id SERIAL PRIMARY KEY,
@@ -17,5 +15,3 @@ CREATE TABLE orderdetails (
     SalePrice NUMERIC(6, 2),
     Status TEXT NOT NULL DEFAULT 'Created'
 );
-
-COMMIT;
