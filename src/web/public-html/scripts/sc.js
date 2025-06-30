@@ -101,15 +101,6 @@ function executesearch() {
   const element = document.getElementById('searchtext');
   const searchtext = element.value;
 
-  const brand = document.getElementById('brand');
-  const brandtext = brand.value;
-
-  const productName = document.getElementById('productName');
-  const productNametext = productName.value;
-  
-  const productId = document.getElementById('productId');
-  const productIdtext = productId.value;
-
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -130,7 +121,7 @@ function executesearch() {
     }
   };
 
-  xhttp.open("GET", "/cp/get_item?itemId=" + searchtext + "&brand=" + brandtext + "&productName=" + encodeURIComponent(productNametext) + "&productId=" + productIdtext,  true);
+  xhttp.open("GET", "/cp/get_item?itemId=" + searchtext,  true);
   xhttp.send();
 }
 
@@ -366,37 +357,83 @@ function createdelbtn(item, qty) {
 
 
 function createrow(item, keys, addqty = true, adddeletebtn = false) {
-  const row = document.createElement('tr');
-  keys.forEach(key => {
-	const div = document.createElement('div');
-	div.textContent = item[key] || ""; // Fill empty fields with blank		
+  // const row = document.createElement('tr');
+  // keys.forEach(key => {
+	// const div = document.createElement('div');
+	// div.textContent = item[key] + " " || ""; // Fill empty fields with blank		
 
-	if (key == "ProduceName") {
-		const img = document.createElement('img');
-		img.src = "/images/600x400/FF5733/FFFFFF/AshirvadAtta";
-		div.appendChild(img) 		
-	}
-	
+	// if (key == "ProduceName") {
+            const key = "ProduceName";
+            const div = document.createElement('div');
+            div.textContent = item[key] + " " || ""; // Fill empty fields with blank
+            biv = document.createElement('div');
+            biv.textContent = "";
+            div.appendChild(biv);
+            const img = document.createElement('img');
+            const brand = item['Brand'];
+            const imagePath =  "/images/600x400/FF5733/FFFFFF/AshirvadAtta";
+            img.src = imagePath;
+            div.appendChild(img)
+
+            if (addqty) {
+                const qty = createqty(item);
+                const addBtn = createaddbtn(item, qty);
+                biv.appendChild(addBtn);
+                biv.appendChild(qty);
+                const subBtn = createsubbtn(item, qty);
+                biv.appendChild(subBtn);
+
+                if(adddeletebtn) {
+                    const delBtn = createdelbtn(item, qty);
+                    biv.appendChild(delBtn);
+                }
+            } 
+
+            biv = document.createElement('div');
+            biv.textContent = "Brand: " + item['Brand'] || "";
+            div.appendChild(biv);
+            biv = document.createElement('div');
+            biv.textContent = "Item Id: " + item['Item Id'] || "";
+            div.appendChild(biv);
+            biv = document.createElement('div');
+            biv.textContent = "Regular Price: " +  item['Regular Price'] || "";
+            div.appendChild(biv);
+            biv = document.createElement('div');
+            biv.textContent = "Sale Price: " +   priceMap.get(item["Item Id"]) || "";
+            div.appendChild(biv);
+
+            const td = document.createElement('td');
+            td.appendChild(div);
+            return td;
+            // row.appendChild(td);
+	// }
+
+        /*	
 	if (key == "Brand") {
 		const brand = item[key] || "";
 		const imagePath = largeBrandImageMap.get(brand);
 		if (typeof imagePath !== 'undefined') {
 			const img = document.createElement('img');
 			img.src = imagePath;
-			div.appendChild(img)		
+			// div.appendChild(img)		
 		}
 	}
 
+        */
+
+        /*
 	const td = document.createElement('td');
-    td.appendChild(div);	
-    if (key == "Regular Price" || key == "Promotional Price" || key == "Sale Price") {
-      td.style.textAlign = 'right';
-    }
+        td.appendChild(div);	
 
+        if (key == "Regular Price" || key == "Promotional Price" || key == "Sale Price") {
+            td.style.textAlign = 'right';
+        }
 	
-    row.appendChild(td);
-  });
+        row.appendChild(td);
+        */
+  // });
 
+  /*
   const tdsaleprice = document.createElement('td');
   tdsaleprice.style.textAlign = 'right'; 
   tdsaleprice.textContent = priceMap.get(item["Item Id"]);
@@ -415,19 +452,23 @@ function createrow(item, keys, addqty = true, adddeletebtn = false) {
       row.appendChild(delBtn);
     }
   }
+  */
 
-  return row;
+  // return row;
 }
 
 function createheader(keys) {
   // Generate table headers
   const headerRow = document.createElement('tr');
   keys.forEach(key => {
-    const th = document.createElement('th');
-    th.textContent = key.charAt(0).toUpperCase() + key.slice(1); // Capitalize header
-    headerRow.appendChild(th);
+    if (key == "ProduceName") {
+      const th = document.createElement('th');
+      th.textContent = key.charAt(0).toUpperCase() + key.slice(1); // Capitalize header
+      headerRow.appendChild(th);
+    }
   });
 
+  /*
   // Add Sale Price 
   const thSalePrice = document.createElement('th');
   thSalePrice.style.textAlign = 'center';
@@ -439,6 +480,7 @@ function createheader(keys) {
   thQty.style.textAlign = 'center';
   thQty.textContent = "Qty";
   headerRow.appendChild(thQty);
+  */
 
   return headerRow;
 }
@@ -447,15 +489,18 @@ function generaterows(data, keys, addqty = true, adddeletebtn) {
   // Generate table rows
   rows = [];
   rowindex = 0;
+  const row = document.createElement('tr');
   data.forEach(item => {
     const price = getprice(item); 
     if(!priceMap.has(item["Item Id"])) {
       priceMap.set(item["Item Id"], price);
     }
    
-    const row  = createrow(item, keys, addqty, adddeletebtn);
-    rows[rowindex++] = row;
+    const td = createrow(item, keys, addqty, adddeletebtn);
+    row.appendChild(td); 
+    // rows[rowindex++] = row;
   });
-
+  
+  rows[0] = row;
   return rows;
 }
