@@ -23,15 +23,18 @@
 <body>
 
 <div class="topnav">
-  <a class="active" href="#home" onclick="javascript:displayhome()">Home</a>
-  <a href="#search" onclick="javascript:itemsearch()">Search</a>
-  <a href="#DisplayCart" onclick="javascript:displaycart()">Shopping Cart</a>
+  <a href="#DisplayCart" onclick="javascript:displaycart()">Shopping Cart<img src="images/shcart.png" width="21" height="21"></a>
   <a href="#Orders" onclick="javascript:displayorders()">Orders</a>
-  <a href="#about">About</a>
 </div> 
 
-<div id="content" class="container">
+<div class="container">
+<h2>Welcome to Storov where you can find all your required groceries</h2>
+<input id="searchtext" type="text" name="searchtext"><button type="button" onclick="executesearch()"><img src="images/search.png" width="21" height="21"></button>
+    <div id="carttotal" width="100px"></div>
 </div>
 
+<div id="content" class="container div1">
+  <div id="table-container"></div>
+</div>
 </body>
 </html> 
