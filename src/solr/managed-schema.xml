@@ -594,17 +594,18 @@
   <copyField source="items.size" dest="items.size_str" maxChars="256"/>
   <copyField source="ingredients" dest="ingredients_str" maxChars="256"/>
   <copyField source="items.inventory.stockLevel" dest="items.inventory.stockLevel_str" maxChars="256"/>
-  <copyField source="categories" dest="categories_str" maxChars="256"/>
+  <copyField source="categories" dest="all_str"/>
   <copyField source="countryOfOrigin" multiValued="false" dest="all_str"/>
   <copyField source="brand" dest="all_str"/>
+  <copyField source="items.itemId" dest="all_str"/>
   <copyField source="items.currency" dest="items.currency_str" maxChars="256"/>
   <copyField source="images.sizes.size" dest="images.sizes.size_str" maxChars="256"/>
   <copyField source="delete" dest="delete_str" maxChars="256"/>
-  <copyField source="doc.detailedDescription" dest="doc.detailedDescription_str" maxChars="256"/>
-  <copyField source="doc.usageInstructions" dest="doc.usageInstructions_str" maxChars="256"/>
+  <copyField source="doc.detailedDescription" dest="all_str"/>
+  <copyField source="doc.usageInstructions" dest="all_str">
   <copyField source="doc.items.price.currency" dest="doc.items.price.currency_str" maxChars="256"/>
   <copyField source="doc.temperatureRequirements.indicator" dest="doc.temperatureRequirements.indicator_str" maxChars="256"/>
-  <copyField source="doc.countryOfOrigin" multiValued="false" dest="doc.countryOfOrigin_str" maxChars="256"/>
+  <copyField source="doc.countryOfOrigin" dest="all_str"/>
   <copyField source="doc.brand" dest="doc.brand_str" maxChars="256"/>
   <copyField source="doc.images.sizes.size" dest="doc.images.sizes.size_str" maxChars="256"/>
   <copyField source="doc.productName" dest="doc.productName_str" maxChars="256"/>
