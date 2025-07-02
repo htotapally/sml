@@ -24,17 +24,20 @@ import uuid
 
 import configparser
 
+from typing import Any
+
 from itertools import product
 
-from productsvc import ProductSvc
+from delegator import Delegator
 
 class WebServer:
-    """Rest services for order processing."""
+    """Rest services for product search processing."""
     
     def __init__(self, solrendpoint, solrcollection):
-      super().__init__()
+      # super().__init__()
       self.solrendpoint = solrendpoint
       self.solrcollection = solrcollection      
+      self.delegate = Delegator(self.solrendpoint, self.solrcollection)
 
     @cherrypy.expose
     def index(self):
@@ -44,15 +47,18 @@ class WebServer:
     @cherrypy.tools.json_out()
     def get_allitems(self):
         cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
-        productsvc = ProductSvc(self.solrendpoint, self.solrcollection)
-        return productsvc.get_allitems()
+        return self.delegate.get_allitems()
     
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def get_item(self, itemId = '', brand = '',  productName = '', productId = ''):
-        productsvc = ProductSvc(self.solrendpoint, self.solrcollection)
-        return productsvc.getitem(itemId, brand,  productName, productId)
-    
+        return self.delegate.getitem(itemId, brand,  productName, productId)
+   
+    @cherrypy.expose
+    @cherrypy.tools.json_out()    
+    def getitembyid(self, itemId):
+        return self.delegate.getitembyid(itemId)
+                
     '''
     @cherrypy.expose
     def get_price(self, itemId = 'PB000005-100G'):
@@ -111,7 +117,6 @@ def cors_tool():
 def main():
     cherrypy_cors.install()
     confpath = os.path.join(os.path.dirname(__file__), '/config/webserver.conf')
-    print (confpath)
 
     port = 9080
     host = 'localhost'
