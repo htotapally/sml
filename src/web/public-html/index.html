@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="css/styles.css">
 
 </head>
-<body>
+<body onload="loadDoc()">
 
 <div class="topnav">
   <a href="#DisplayCart" onclick="javascript:displaycart()">Shopping Cart<img src="images/shcart.png" width="21" height="21"></a>
@@ -36,5 +36,10 @@
 <div id="content" class="container div1">
   <div id="table-container"></div>
 </div>
+
+<div id="floatingDiv" style="display: none; position: absolute; border: 1px solid black; padding: 10px; background-color: lightyellow;">
+        This is the floating div!
+</div>
+
 </body>
 </html> 
