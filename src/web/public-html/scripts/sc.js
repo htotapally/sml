@@ -148,7 +148,7 @@ function placeorder() {
   };
 
   x = JSON.stringify(Object.fromEntries(cart));
-  xhttp.open("POST", "/cp/placeorder?cart=" + x, true);
+  xhttp.open("POST", "/os/placeorder?cart=" + x, true);
   xhttp.send();
 }
 
@@ -246,6 +246,8 @@ function loadDoc() {
 
         const intentstatus = document.getElementById('intent-status');
         intentstatus.innerHTML = params.get('redirect_status');
+
+        placeorder();
       }
     }
   }
