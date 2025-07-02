@@ -214,23 +214,50 @@ function generateTable(data, addqty = true, adddeletebtn = false) {
 }
 
 function loadDoc() {
+  var redirected = false;
+  const params = new URLSearchParams(window.location.search);
+  for (const [key, value] of params){
+    console.log(key, ': ', value);
+    if (key == "payment_intent") {
+      redirected = true;
+    }
+  }
+
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       responseText = this.responseText;
-      jsonArray = JSON.parse(responseText);
-      var docs = convertToRenderable(jsonArray);
+      if (!redirected) {
+        jsonArray = JSON.parse(responseText);
+        var docs = convertToRenderable(jsonArray);
 
-      // Render the table
-      const container = document.getElementById('table-container');
-      container.innerHTML = '';
-      const table = generateTable(docs);
+        // Render the table
+        const container = document.getElementById('table-container');
+        container.innerHTML = '';
+        const table = generateTable(docs);
       
-      if (table) container.appendChild(table);
+        if (table) container.appendChild(table);
+      } else {
+        const container = document.getElementById('content');
+        container.innerHTML = responseText;
+
+        const intentid = document.getElementById('intent-id');
+        intentid.innerHTML = params.get('payment_intent');
+
+        const intentstatus = document.getElementById('intent-status');
+        intentstatus.innerHTML = params.get('redirect_status');
+      }
     }
   }
 
-  xhttp.open("GET", "/cp/get_allitems", true);
+  if (redirected) {
+    console.log("Redirect from payment confirmation");
+    xhttp.open("GET", "/complete.html", true);
+  }
+  else {
+    xhttp.open("GET", "/cp/get_allitems", true);
+  }
+
   xhttp.send();
 }
 
@@ -262,9 +289,6 @@ function convertCartToRenderable(items) {
     docs[index]["ProduceName"] = doc["ProduceName"]
     docs[index]["Brand"] = doc["Brand"]
     docs[index]["Item Id"] = doc["Item Id"]
-    // docs[index]["Price"] = priceMap.get(key);
-    // docs[index]["Regular Price"] = doc["items"][j]["price"]["regular"]
-    // docs[index]["Promotional Price"] = doc["items"][j]["price"]["promo"]
     index++;
   }
 
@@ -357,104 +381,48 @@ function createdelbtn(item, qty) {
 
 
 function createrow(item, keys, addqty = true, adddeletebtn = false) {
-  // const row = document.createElement('tr');
-  // keys.forEach(key => {
-	// const div = document.createElement('div');
-	// div.textContent = item[key] + " " || ""; // Fill empty fields with blank		
-
-	// if (key == "ProduceName") {
-            const key = "ProduceName";
-            const div = document.createElement('div');
-            div.textContent = item[key] + " " || ""; // Fill empty fields with blank
-            biv = document.createElement('div');
-            biv.textContent = "";
-            div.appendChild(biv);
-            const img = document.createElement('img');
-            const brand = item['Brand'];
-            const imagePath =  "/images/600x400/FF5733/FFFFFF/AshirvadAtta";
-            img.src = imagePath;
-            div.appendChild(img)
-
-            if (addqty) {
-                const qty = createqty(item);
-                const addBtn = createaddbtn(item, qty);
-                biv.appendChild(addBtn);
-                biv.appendChild(qty);
-                const subBtn = createsubbtn(item, qty);
-                biv.appendChild(subBtn);
-
-                if(adddeletebtn) {
-                    const delBtn = createdelbtn(item, qty);
-                    biv.appendChild(delBtn);
-                }
-            } 
-
-            biv = document.createElement('div');
-            biv.textContent = "Brand: " + item['Brand'] || "";
-            div.appendChild(biv);
-            biv = document.createElement('div');
-            biv.textContent = "Item Id: " + item['Item Id'] || "";
-            div.appendChild(biv);
-            biv = document.createElement('div');
-            biv.textContent = "Regular Price: " +  item['Regular Price'] || "";
-            div.appendChild(biv);
-            biv = document.createElement('div');
-            biv.textContent = "Sale Price: " +   priceMap.get(item["Item Id"]) || "";
-            div.appendChild(biv);
-
-            const td = document.createElement('td');
-            td.appendChild(div);
-            return td;
-            // row.appendChild(td);
-	// }
-
-        /*	
-	if (key == "Brand") {
-		const brand = item[key] || "";
-		const imagePath = largeBrandImageMap.get(brand);
-		if (typeof imagePath !== 'undefined') {
-			const img = document.createElement('img');
-			img.src = imagePath;
-			// div.appendChild(img)		
-		}
-	}
-
-        */
-
-        /*
-	const td = document.createElement('td');
-        td.appendChild(div);	
-
-        if (key == "Regular Price" || key == "Promotional Price" || key == "Sale Price") {
-            td.style.textAlign = 'right';
-        }
-	
-        row.appendChild(td);
-        */
-  // });
-
-  /*
-  const tdsaleprice = document.createElement('td');
-  tdsaleprice.style.textAlign = 'right'; 
-  tdsaleprice.textContent = priceMap.get(item["Item Id"]);
-  row.appendChild(tdsaleprice);
+  const key = "ProduceName";
+  const div = document.createElement('div');
+  div.textContent = item[key] + " " || ""; // Fill empty fields with blank
+  biv = document.createElement('div');
+  biv.textContent = "";
+  div.appendChild(biv);
+  const img = document.createElement('img');
+  const brand = item['Brand'];
+  const imagePath =  "/images/600x400/FF5733/FFFFFF/AshirvadAtta";
+  img.src = imagePath;
+  div.appendChild(img)
 
   if (addqty) {
     const qty = createqty(item);
     const addBtn = createaddbtn(item, qty);
-    row.appendChild(addBtn);
-    row.appendChild(qty);
+    biv.appendChild(addBtn);
+    biv.appendChild(qty);
     const subBtn = createsubbtn(item, qty);
-    row.appendChild(subBtn);
+    biv.appendChild(subBtn);
 
     if(adddeletebtn) {
       const delBtn = createdelbtn(item, qty);
-      row.appendChild(delBtn);
+      biv.appendChild(delBtn);
     }
-  }
-  */
+  } 
 
-  // return row;
+  biv = document.createElement('div');
+  biv.textContent = "Brand: " + item['Brand'] || "";
+  div.appendChild(biv);
+  biv = document.createElement('div');
+  biv.textContent = "Item Id: " + item['Item Id'] || "";
+  div.appendChild(biv);
+  biv = document.createElement('div');
+  biv.textContent = "Regular Price: " +  item['Regular Price'] || "";
+  div.appendChild(biv);
+  biv = document.createElement('div');
+  biv.textContent = "Sale Price: " +   priceMap.get(item["Item Id"]) || "";
+  div.appendChild(biv);
+
+  const td = document.createElement('td');
+  td.appendChild(div);
+  return td;
 }
 
 function createheader(keys) {

@@ -1,3 +1,5 @@
+let hoverTimer; 
+
 function displayorders() {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -254,10 +256,23 @@ function createorderdetailrow(item, keys, addqty = true, adddeletebtn = false) {
       td.style.textAlign = 'right';
     }
 
-    if (key == "OrderId") {
-      // hr = createhref(item["OrderId"]);
-      td.innerHTML = "<a href=# onclick=javascript:check('" + item["OrderId"] +"')>" + item["OrderId"] + "</a>";
+    if (key == "Item Id") {
+      td.textContent = '';
+      const anchor = document.createElement('a');
+      anchor.setAttribute("href", '#');
+      anchor.textContent = item["Item Id"];
+      anchor.addEventListener("mouseover", function(event) {
+       displayitemdetails(event, item["Item Id"]);
+      });
+
+      anchor.addEventListener("mouseout", function(event) {
+       cleartimeout();
+      });
+
+      td.appendChild(anchor);
     }
+
+
     row.appendChild(td);
   });
 
@@ -278,3 +293,43 @@ function createorderdetailrow(item, keys, addqty = true, adddeletebtn = false) {
 
   return row;
 }
+
+function displayitemdetails(event, itemId) {
+  clearTimeout(hoverTimer);
+  // Set a new timer to execute the action after 500ms
+  hoverTimer = setTimeout(function() {
+    displayItemDetails(event, itemId);
+  }, 500);
+}
+
+function cleartimeout() {
+  clearTimeout(hoverTimer);
+  const floatingDiv = document.getElementById('floatingDiv');
+  floatingDiv.style.display = 'none';
+}
+
+function displayItemDetails(event, itemId) {
+  fetchItemDetails(event, itemId);
+}
+
+function fetchItemDetails(event, itemId) {
+  const floatingDiv = document.getElementById('floatingDiv');
+  floatingDiv.style.width = '400px' 
+  floatingDiv.style.height = '300px'
+  floatingDiv.innerHTML = this.responseText;
+  floatingDiv.style.overflow = 'auto';
+  floatingDiv.style.left = event.clientX + 10 + 'px';
+  floatingDiv.style.top = event.clientY + 10 + 'px';
+
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      floatingDiv.innerHTML = this.responseText;
+      floatingDiv.style.display = 'block';
+    }
+  };
+
+  xhttp.open("GET", "/cp/getitembyid?itemId=" + itemId, true);
+  xhttp.send();
+}
+
