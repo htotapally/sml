@@ -15,7 +15,7 @@ document
 async function initialize() {
   const carttotal = document.querySelector("#carttotal");
   
-  const response = await fetch("http://localhost/os/create_payment_intent", {
+  const response = await fetch("/os/create_payment_intent", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(Object.fromEntries(cart))
@@ -38,12 +38,14 @@ async function initialize() {
 async function handleSubmit(e) {
   e.preventDefault();
   setLoading(true);
+  var host = window.location.protocol + "//" + window.location.host;
+  var  return_url = host + "/";
 
   const { error } = await stripe.confirmPayment({
     elements,
     confirmParams: {
       // Make sure to change this to your payment completion page
-      return_url: "https://localhost/complete.html",
+      return_url: return_url
     },
   });
 
