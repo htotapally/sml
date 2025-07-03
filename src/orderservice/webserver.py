@@ -64,10 +64,16 @@ class WebServer:
       
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def placeorder(self, cart):
+    def placeorder(self, cart, paymentintent, amount, redirectstatus):
         orderSvc = self.createordsvc()
-        message = orderSvc.placeorder(cart);
-        return f'{message}'    
+        message = orderSvc.placeorder(cart, paymentintent, amount, redirectstatus);
+        return f'{message}'   
+ 
+    @cherrypy.expose
+    def confirmpayment(self, paymentintent, redirectstatus):
+        orderSvc = self.createordsvc()
+        message = orderSvc.confirmpayment(paymentintent, redirectstatus);
+        return f'{message}'
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
@@ -101,6 +107,7 @@ class WebServer:
             print("Creating stripe payment intent")
             # Create a PaymentIntent with the order amount and currency
             amount = calculate_order_amount(items)
+            print(amount)
             intent = stripe.PaymentIntent.create(
                 amount = amount, 
                 currency = 'usd',
@@ -117,8 +124,8 @@ class WebServer:
                         "message_type": "info",
                         "ClientSecret": intent['client_secret']
                     })
-                                
-            self.placeorder(body)    
+            
+            self.placeorder(body, intent['client_secret'], amount, 'Created')                   
             return {'clientSecret': intent['client_secret']}
         except Exception as e:
             print(e) 
@@ -135,7 +142,22 @@ def calculate_order_amount(items):
     # Replace this constant with a calculation of the order's amount
     # Calculate the order total on the server to prevent
     # people from directly manipulating the amount on the client
-    return int(1400)
+    cartTotal = 0.0
+
+    for item in items:
+      print(item)
+      product = item["item"]
+      print(product)
+      regularprice = product["Regular Price"]
+      print(regularprice)
+      promoprice = product["Promotional Price"]
+      print(promoprice)
+      salePrice = saleprice(regularprice, promoprice)
+      print(saleprice)
+      cartTotal = cartTotal + salePrice
+    
+    print (cartTotal)
+    return int(cartTotal * 100)
 
 def cors_tool():
     '''
@@ -210,6 +232,14 @@ if os.path.exists(ordsvcconf):
 trace.get_tracer_provider().add_span_processor(
    BatchSpanProcessor(otlp_exporter)
 )
+
+def saleprice(regular, promo):
+    if promo > 0:
+      m = min(float(regular), float(promo))
+    else:
+      m = regular
+
+    return m
 
 def main():
     cherrypy_cors.install()

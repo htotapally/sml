@@ -5,7 +5,7 @@ conn = psycopg2.connect(database="template1", user="postgres", password="<REPLAC
 Update stripe key in webserver.py if needed.
 
 Building Docker image
-sudo docker build -t orderservice .
+docker build -t htotapally/orderservice .
 
 Running Docker image
 sudo docker run --name orderservice -d -p 8090:8090 orderservice

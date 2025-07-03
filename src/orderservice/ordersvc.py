@@ -15,6 +15,7 @@ from opentelemetry.sdk.trace.export import ConsoleSpanExporter
 from base import Session, engine, Base
 from onlineorder import OnlineOrder
 from orderdetails import OrderDetails
+from paymentconfirmation import PaymentConfirmation 
 
 class OrderSvc:
     def __init__(self, config):
@@ -51,9 +52,15 @@ class OrderSvc:
 
       return ordereditems
   
-    def placeorder(self, cart):
+    def placeorder(self, cart, paymentintent, amount, redirectstatus):
+        print(cart)
         dict = json.loads(cart)
         itemids = dict.keys()
+        print(itemids)
+
+        for id in itemids:
+          print(id)
+ 
         itemsordered = []
         orderid = uuid.uuid4()
         conn = self.getconn()
@@ -63,23 +70,29 @@ class OrderSvc:
             with tracer.start_as_current_span("CreateOrderSpan") as parent_span:
                 parent_span.add_event("Creating new order.", {
                     "message_type": "info",
-                    "OrderId": orderid
+                    "OrderId": orderid,
+                    "Paymentintent": paymentintent,
+                    "amount": amount,
+                    "Redirectstatus": redirectstatus
                 })
 
         session = Session()
   
-        onlineorder = OnlineOrder(current_dt, str(orderid), 'Created')
+        onlineorder = OnlineOrder(current_dt, str(orderid), paymentintent, amount, redirectstatus, 'Created')
         session.add(onlineorder)
 
+        print("creating items")
         for itemid in itemids:
             lineitems = dict[itemid]
             lineitem = json.loads(json.dumps(lineitems))
+            print(itemid)
+            print(lineitem)
             qty = lineitem["qty"]
             product = json.loads(json.dumps(lineitem["item"]))
             productId = product["Item Id"]
             regprice = product["Regular Price"]
             promoprice = product["Promotional Price"]
-            sale = saleprice(regprice, promoprice)
+            sale = self.saleprice(regprice, promoprice)
             itemOrdered = [productId, qty, sale];
 
             orderdetails = OrderDetails(current_dt, str(orderid), productId, qty, float(sale), 'Created')
@@ -90,6 +103,23 @@ class OrderSvc:
         session.close()
                       
         return f'Your order has been successfully received. Please provide orderid: <b>{orderid}</b> for any questions'  
+
+    def confirmpayment(self, paymentintent, redirectstatus):
+        print(paymentintent)
+        print(redirectstatus)
+
+        session = Session()
+ 
+        onlineorder = session.query(OnlineOrder).filter_by(paymentintent=paymentintent).first()
+        orderid = onlineorder.orderid
+        print(orderid)
+        current_dt = datetime.now()
+        paymentconfirmation = PaymentConfirmation(current_dt, str(orderid), paymentintent, redirectstatus)
+        session.add(paymentconfirmation)
+        session.commit()
+        session.close()
+
+        return "Success"
 
     def acknowledge(self, orderid):
         order = self.getorder(orderid)
@@ -141,27 +171,29 @@ class OrderSvc:
     def getconn(self):
       conn = psycopg2.connect(database=self.database, user=self.user, password=self.password, host=self.host, port=self.port)
       return conn
-      
-def saleprice(item):
-    print(item.get('itemId'))
-    regular = item.get('price').get('regular')
-    promo = item.get('price').get('promo')
-    ag = f"regular: {regular}, promo: {promo}"  
-    print (ag)
-    if promo > 0:
-      m = min(float(regular), float(promo))
-    else:
-      m = regular
-      
-    return m
 
-def saleprice(regular, promo):
-    if promo > 0:
-      m = min(float(regular), float(promo))
-    else:
-      m = regular
+    @staticmethod      
+    def saleprice(item):
+      print(item.get('itemId'))
+      regular = item.get('price').get('regular')
+      promo = item.get('price').get('promo')
+      ag = f"regular: {regular}, promo: {promo}"  
+      print (ag)
+      if promo > 0:
+        m = min(float(regular), float(promo))
+      else:
+        m = regular
       
-    return m
+      return m
+    
+    @staticmethod
+    def saleprice(regular, promo):
+      if promo > 0:
+        m = min(float(regular), float(promo))
+      else:
+        m = regular
+      
+      return m
 
 provider = TracerProvider(
   resource = Resource.create({SERVICE_NAME: "OrderService"})
