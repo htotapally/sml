@@ -54,7 +54,7 @@ function displaycart() {
     if (this.readyState == 4 && this.status == 200) {
       document.getElementById("content").innerHTML = this.responseText;
       
-      displaypayment();
+      // displaypayment();
 
       cartTotal = calculatetotal();
 
@@ -84,6 +84,48 @@ function displaycart() {
   xhttp.open("GET", "displaycart.html", true);
   xhttp.send();
 }
+
+function displaycard() {
+  // Clear existing div
+  contentdiv = document.getElementById("content");
+  contentdiv.replaceChildren();
+
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("content").innerHTML = this.responseText;
+
+      displaypayment();
+
+      cartTotal = calculatetotal();
+
+      data = [];
+      index = 0;
+      for (const [key, value] of cart.entries()) {
+        item = value["item"];
+        data[index++] = value;
+      }
+
+      if (data.length > 0) {
+        // Render the data in tabular format
+        var docs = convertCartToRenderable(data);
+        // Render the table
+        const container = document.getElementById('table-container');
+        container.innerHTML = '';
+        const table = generateTable(docs, true);
+        // if (table) container.appendChild(table);
+
+        const element = document.getElementById('carttotal');
+        t =  "Cart total: $<b>" + cartTotal + "</b>";
+        element.innerHTML = t;
+      }
+    }
+  };
+
+  xhttp.open("GET", "paywithcard.html", true);
+  xhttp.send();
+}
+
 
 function itemsearch() {
   var xhttp = new XMLHttpRequest();
