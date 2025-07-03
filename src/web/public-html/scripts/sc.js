@@ -138,8 +138,8 @@ function loadallitems() {
   loadDoc();
 }
 
-function placeorder() {
-  console.log('Place Order');
+function confirmpayment(payment_intent, redirect_status) {
+  console.log('Confirm payment');
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -147,8 +147,7 @@ function placeorder() {
     }
   };
 
-  x = JSON.stringify(Object.fromEntries(cart));
-  xhttp.open("POST", "/os/placeorder?cart=" + x, true);
+  xhttp.open("POST", "/os/confirmpayment?paymentintent=" + payment_intent + "&redirectstatus=" +  redirect_status, true);
   xhttp.send();
 }
 
@@ -241,13 +240,15 @@ function loadDoc() {
         const container = document.getElementById('content');
         container.innerHTML = responseText;
 
-        const intentid = document.getElementById('intent-id');
+        /*
+        const intentid = document.getElementById('payment_intent');
         intentid.innerHTML = params.get('payment_intent');
 
         const intentstatus = document.getElementById('intent-status');
         intentstatus.innerHTML = params.get('redirect_status');
+        */
 
-        placeorder();
+        confirmpayment(params.get('payment_intent_client_secret'), params.get('redirect_status'));
       }
     }
   }
