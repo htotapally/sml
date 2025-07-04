@@ -21,15 +21,13 @@ function displayhome() {
   xhttp.send();
 }
 
-function displaypayment() {
-   const fullname = document.getElementById("fullname");
-
+function displaypayment(guestinfo) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       si = document.getElementById("stripeintegration");
       document.getElementById("stripeintegration").innerHTML = this.responseText;
-      loadcheckout();
+      loadcheckout(guestinfo);
     }
   };
   
@@ -37,21 +35,10 @@ function displaypayment() {
   xhttp.send();
 }
 
-function loadcheckout() {
-      /*
-      file = 'scripts/checkout.js';
-      const newScript = document.createElement('script');
-      newScript.setAttribute('src', 'scripts/checkout.js');
-      newScript.setAttribute('type', 'text/javascript');
-      newScript.setAttribute('async', 'true');
+function loadcheckout(guestinfo) {
+      const fullname = guestinfo;
 
-      newScript.onload = () => console.log(`${file} loaded successfully.`);
-      newScript.onerror = () => console.error(`Error loading script: ${file}`);
-      */
-
-      const fullname = document.getElementById("fullname");
-
-      initialize();
+      initialize(guestinfo);
 
       document
           .querySelector("#payment-form")
@@ -100,7 +87,8 @@ function displaycart() {
 }
 
 function displaycard() {
-  const fullname = document.getElementById("fullname");
+  const guestinfo = getguestinfo();
+  
 
   // Clear existing div
   contentdiv = document.getElementById("content");
@@ -111,7 +99,7 @@ function displaycard() {
     if (this.readyState == 4 && this.status == 200) {
       document.getElementById("content").innerHTML = this.responseText;
 
-      displaypayment();
+      displaypayment(guestinfo);
 
       cartTotal = calculatetotal();
 
@@ -535,14 +523,18 @@ function generaterows(data, keys, addqty = true, adddeletebtn) {
 }
 
 // Fetches a payment intent and captures the client secret
-async function initialize() {
-
-  const fullname = document.querySelector("#fullname");
-  
+async function initialize(guestinfo) {
+ 
+  const body = {
+    cart: JSON.stringify(Object.fromEntries(cart)),
+    guestinfo: guestinfo
+  }
+  // body: JSON.stringify(Object.fromEntries(body))
+ 
   const response = await fetch("/os/create_payment_intent", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(Object.fromEntries(cart))
+    body: JSON.stringify(body)
   });
   const { clientSecret } = await response.json();
 
@@ -616,3 +608,34 @@ function setLoading(isLoading) {
   }
 }
 
+function getguestinfo() {
+  const fullname = document.getElementById("fullname").value;
+
+  const email = document.getElementById("email").value;
+
+  const phonenumber = document.getElementById("phonenumber").value;
+
+  const address1 = document.getElementById("address1").value;
+
+  const address2 = document.getElementById("address2").value;
+
+  const city = document.getElementById("city").value;
+
+  const state = document.getElementById("state").value;
+
+  const zipcode = document.getElementById("zipcode").value;
+
+
+  const guestinfo = {
+    fullname: fullname,
+    email: email,
+    phonenumber: phonenumber,
+    address1: address1,
+    address2: address2,
+    city: city,
+    state: state,
+    zipcode: zipcode
+  }
+
+  return guestinfo;
+}
