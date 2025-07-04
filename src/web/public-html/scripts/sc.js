@@ -1,6 +1,10 @@
 let cart = new Map();
 let priceMap = new Map();
 
+const stripe = Stripe("pk_test_TYooMQauvdEDq54NiTphI7jx");
+
+let elements;
+
 window.onload = function() {
   // Code to execute after all resources are loaded
   displayhome();
@@ -18,11 +22,13 @@ function displayhome() {
 }
 
 function displaypayment() {
+   const fullname = document.getElementById("fullname");
+
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-       si = document.getElementById("stripeintegration");
-       document.getElementById("stripeintegration").innerHTML = this.responseText;
+      si = document.getElementById("stripeintegration");
+      document.getElementById("stripeintegration").innerHTML = this.responseText;
       loadcheckout();
     }
   };
@@ -32,6 +38,7 @@ function displaypayment() {
 }
 
 function loadcheckout() {
+      /*
       file = 'scripts/checkout.js';
       const newScript = document.createElement('script');
       newScript.setAttribute('src', 'scripts/checkout.js');
@@ -40,8 +47,15 @@ function loadcheckout() {
 
       newScript.onload = () => console.log(`${file} loaded successfully.`);
       newScript.onerror = () => console.error(`Error loading script: ${file}`);
+      */
 
-      document.head.appendChild(newScript);
+      const fullname = document.getElementById("fullname");
+
+      initialize();
+
+      document
+          .querySelector("#payment-form")
+          .addEventListener("submit", handleSubmit);
 }
 
 function displaycart() {
@@ -86,6 +100,8 @@ function displaycart() {
 }
 
 function displaycard() {
+  const fullname = document.getElementById("fullname");
+
   // Clear existing div
   contentdiv = document.getElementById("content");
   contentdiv.replaceChildren();
@@ -517,3 +533,86 @@ function generaterows(data, keys, addqty = true, adddeletebtn) {
   rows[0] = row;
   return rows;
 }
+
+// Fetches a payment intent and captures the client secret
+async function initialize() {
+
+  const fullname = document.querySelector("#fullname");
+  
+  const response = await fetch("/os/create_payment_intent", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(Object.fromEntries(cart))
+  });
+  const { clientSecret } = await response.json();
+
+  const appearance = {
+    theme: 'stripe',
+  };
+  elements = stripe.elements({ appearance, clientSecret });
+
+  const paymentElementOptions = {
+    layout: "accordion",
+  };
+
+  const paymentElement = elements.create("payment", paymentElementOptions);
+  paymentElement.mount("#payment-element");
+}
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  setLoading(true);
+  var host = window.location.protocol + "//" + window.location.host;
+  var  return_url = host + "/";
+
+  const { error } = await stripe.confirmPayment({
+    elements,
+    confirmParams: {
+      // Make sure to change this to your payment completion page
+      return_url: return_url
+    },
+  });
+
+  // This point will only be reached if there is an immediate error when
+  // confirming the payment. Otherwise, your customer will be redirected to
+  // your `return_url`. For some payment methods like iDEAL, your customer will
+  // be redirected to an intermediate site first to authorize the payment, then
+  // redirected to the `return_url`.
+  if (error.type === "card_error" || error.type === "validation_error") {
+    showMessage(error.message);
+  } else {
+    showMessage("An unexpected error occurred.");
+  }
+
+  console.log("Do what needs to be done");
+  setLoading(false);
+}
+
+// ------- UI helpers -------
+
+function showMessage(messageText) {
+  const messageContainer = document.querySelector("#payment-message");
+
+  messageContainer.classList.remove("hidden");
+  messageContainer.textContent = messageText;
+
+  setTimeout(function () {
+    messageContainer.classList.add("hidden");
+    messageContainer.textContent = "";
+  }, 4000);
+}
+
+// Show a spinner on payment submission
+function setLoading(isLoading) {
+  if (isLoading) {
+    // Disable the button and show a spinner
+    document.querySelector("#submit").disabled = true;
+    document.querySelector("#spinner").classList.remove("hidden");
+    document.querySelector("#button-text").classList.add("hidden");
+  } else {
+    document.querySelector("#submit").disabled = false;
+    document.querySelector("#spinner").classList.add("hidden");
+    document.querySelector("#button-text").classList.remove("hidden");
+  }
+}
+
