@@ -30,3 +30,21 @@ CREATE TABLE paymentconfirmation (
     paymentintent TEXT PRIMARY KEY,
     redirectstatus TEXT NOT NULL
 );
+
+CREATE TABLE guestorders (
+    id INT DEFAULT nextval('paymentconfirmationseq') NOT NULL,
+    createtime TIMESTAMP NOT NULL DEFAULT NOW(),
+    orderid uuid NOT NULL PRIMARY KEY,
+    fullname TEXT,
+    email TEXT,
+    phonenumber TEXT,
+    address1 TEXT,
+    address2 TEXT,
+    city TEXT,
+    state TEXT,
+    zipcode TEXT
+);
+
+CREATE SEQUENCE guestorderseq;
+
+ALTER TABLE guestorders ALTER id SET DEFAULT nextval('guestorderseq');
