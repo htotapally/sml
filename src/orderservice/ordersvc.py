@@ -16,6 +16,7 @@ from base import Session, engine, Base
 from onlineorder import OnlineOrder
 from orderdetails import OrderDetails
 from paymentconfirmation import PaymentConfirmation 
+from guestorder import GuestOrder
 
 class OrderSvc:
     def __init__(self, config):
@@ -52,7 +53,7 @@ class OrderSvc:
 
       return ordereditems
   
-    def placeorder(self, cart, paymentintent, amount, redirectstatus):
+    def placeorder(self, cart, guestinfo, paymentintent, amount, redirectstatus):
         print(cart)
         dict = json.loads(cart)
         itemids = dict.keys()
@@ -98,6 +99,10 @@ class OrderSvc:
             orderdetails = OrderDetails(current_dt, str(orderid), productId, qty, float(sale), 'Created')
             session.add(orderdetails)
 
+
+        print('Adding guest info')
+        guestinfobean = createguestinfo(current_dt, str(orderid), guestinfo)
+        session.add(guestinfobean)
  
         session.commit()
         session.close()
@@ -195,6 +200,21 @@ class OrderSvc:
       
       return m
 
+
+def createguestinfo(creationtime, orderid, guestinfo):
+  return GuestOrder(
+    creationtime,
+    orderid,
+    guestinfo["fullname"],
+    guestinfo["email"],
+    guestinfo["phonenumber"],
+    guestinfo["address1"],
+    guestinfo["address2"],
+    guestinfo["city"],
+    guestinfo["state"],
+    guestinfo["zipcode"]
+  )
+
 provider = TracerProvider(
   resource = Resource.create({SERVICE_NAME: "OrderService"})
 )
@@ -224,3 +244,4 @@ if os.path.exists(confpath):
 trace.get_tracer_provider().add_span_processor(
    BatchSpanProcessor(otlp_exporter)
 )
+

@@ -64,9 +64,9 @@ class WebServer:
       
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def placeorder(self, cart, paymentintent, amount, redirectstatus):
+    def placeorder(self, cart, guestinfo,  paymentintent, amount, redirectstatus):
         orderSvc = self.createordsvc()
-        message = orderSvc.placeorder(cart, paymentintent, amount, redirectstatus);
+        message = orderSvc.placeorder(cart, guestinfo, paymentintent, amount, redirectstatus);
         return f'{message}'   
  
     @cherrypy.expose
@@ -99,9 +99,13 @@ class WebServer:
     def create_payment_intent(self):
         body = cherrypy.request.body.read()
         print(body)
-        cart = json.loads(body.decode("utf-8"))
+        jsonobject = json.loads(body.decode("utf-8"))
+        cart = json.loads(jsonobject["cart"])
         items = cart.values()
         print (items)
+
+        guestinfo = jsonobject["guestinfo"]
+        print(guestinfo)
             
         try:
             print("Creating stripe payment intent")
@@ -125,7 +129,7 @@ class WebServer:
                         "ClientSecret": intent['client_secret']
                     })
             
-            self.placeorder(body, intent['client_secret'], amount, 'Created')                   
+            self.placeorder(jsonobject["cart"], guestinfo, intent['client_secret'], amount, 'Created')                   
             return {'clientSecret': intent['client_secret']}
         except Exception as e:
             print(e) 
