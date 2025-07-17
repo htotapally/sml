@@ -1,4 +1,4 @@
-Please update config in server.py till code is adjusted to read from .env file
+Please update config in server.js till code is adjusted to read from .env file
 
 ```
 docker build -t htotapally/storovapi .  
