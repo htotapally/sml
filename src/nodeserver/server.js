@@ -15,7 +15,7 @@ const nodemailer = require('nodemailer'); // Import Nodemailer
 
 // Initialize Express app
 const app = express();
-const port = 3000;
+const port = process.env.nodeport;
 
 // --- Middleware ---
 app.use(cors());
@@ -23,11 +23,11 @@ app.use(express.json());
 
 // --- PostgreSQL Connection Pool Configuration ---
 const pool = new Pool({
-  user: 'storov_user',
-  host: '192.168.1.170',
-  database: 'jsl',
-  password: 'justskipline123',
-  port: 5432,
+  user: process.env.pguser,
+  host: process.env.pghost,
+  database: process.env.pgdatabase,
+  password: process.env.pgpassword,
+  port: process.env.pgport
 });
 
 // Test database connection on server startup
@@ -1399,7 +1399,7 @@ app.post('/api/create-payment-intent', async (req, res) => {
 // app.get('/', (req, res) => res.send(msg));
 
 // now run the application and start listening
-// on port 3000
-app.listen(3000, () => {
+// on port nodeport
+app.listen(nodeport, () => {
     console.log("app running on port 3000...");
 })
