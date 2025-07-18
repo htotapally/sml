@@ -1,7 +1,7 @@
 Update the config file env with environment specific values.  
 Create docker image  
 ```
-docker build -t htotapally/storovapi .
+docker build -t htotapally/sml-apach2 .
 ```
 Running docker image
 ```
