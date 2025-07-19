@@ -13,9 +13,109 @@ const { v4: uuidv4 } = require('uuid');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); // Initialize Stripe with your secret key
 const nodemailer = require('nodemailer'); // Import Nodemailer
 
+const { LogLevel, ConsoleLogger } = require('@opentelemetry/core');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-proto');
+const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-proto');
+
+const { ConsoleSpanExporter } = require('@opentelemetry/sdk-trace-node');
+const {
+  getNodeAutoInstrumentations,
+} = require('@opentelemetry/auto-instrumentations-node');
+
+const {
+  PeriodicExportingMetricReader,
+  ConsoleMetricExporter,
+} = require('@opentelemetry/sdk-metrics');
+
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const sdk = new NodeSDK({
+    traceExporter: new OTLPTraceExporter({
+      url: 'http://192.168.1.170:4318/v1/traces',
+      headers: {},
+    }),
+    metricReader: new PeriodicExportingMetricReader({
+    exporter: new OTLPMetricExporter({
+      url: 'http://192.168.1.170:4318/v1/metrics',
+      headers: {},
+      concurrencyLimit: 1,
+    }),
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+});
+
+const logsAPI = require('@opentelemetry/api-logs');
+const { Resource } = require('@opentelemetry/resources');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+
+const {
+  LoggerProvider,
+  SimpleLogRecordProcessor,
+  ConsoleLogRecordExporter,
+} = require('@opentelemetry/sdk-logs');
+
+// Define a resource for your service
+console.log(Resource);
+/*
+const resource = new Resource(
+  'my-node-service',
+  'my-application'
+);
+*/
+
+console.log(SemanticResourceAttributes.SERVICE_NAME)
+console.log(process.env.OTEL_SERVICE_NAME)
+
+// To start a logger, you first need to initialize the Logger provider.
+const loggerProvider =
+  new LoggerProvider({
+    processors: [
+      new SimpleLogRecordProcessor(
+        new ConsoleLogRecordExporter()
+      )
+    ],
+    /*
+    resource:
+      new Resource({
+        [SemanticResourceAttributes.SERVICE_NAME]: process.env.OTEL_SERVICE_NAME,
+      }),
+    */
+});
+console.log(loggerProvider)
+
+// Add a processor to export log record
+/*
+loggerProvider.addLogRecordProcessor(
+  new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())
+);
+*/
+
+//  To create a log record, you first need to get a Logger instance
+const logger = loggerProvider.getLogger('server', '1.0.0');
+
+// emit a log record
+logger.emit({
+  severityNumber: logsAPI.SeverityNumber.INFO,
+  severityText: 'INFO',
+  body: 'this is a log record body',
+  attributes: { 'log.type': 'LogRecord' },
+});
+
 // Initialize Express app
-const app = express();
-const port = process.env.nodeport;
+const app = express({
+  // traceExporter: new ConsoleSpanExporter(),
+  traceExporter: new OTLPTraceExporter({
+    url: 'http://192.168.1.170:4318/v1/traces',
+    headers: {},
+  }),
+  metricReader: new PeriodicExportingMetricReader({
+    exporter: new ConsoleMetricExporter(),
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+});
+
+const nodeport = process.env.nodeport;
+console.log(nodeport)
 
 // --- Middleware ---
 app.use(cors());
@@ -43,6 +143,14 @@ pool.connect((err, client, release) => {
       process.exit(1);
     }
     console.log('Database connected successfully at:', result.rows[0].now);
+    // emit a log record
+    logger.emit({
+      severityNumber: logsAPI.SeverityNumber.INFO,
+      severityText: 'INFO',
+      body: 'Database connected successfully at:',
+      attributes: { 'log.type': 'LogRecord' },
+    });
+
   });
 });
 
@@ -1400,6 +1508,8 @@ app.post('/api/create-payment-intent', async (req, res) => {
 
 // now run the application and start listening
 // on port nodeport
+// app.listen(nodeport, () => {
 app.listen(nodeport, () => {
+    sdk.start();
     console.log("app running on port 3000...");
 })

@@ -8,3 +8,6 @@ pghost=192.168.1.170
 pgdatabase=jsl
 pgpassword=justskipline123
 pgport=5432
+
+OTEL_EXPORTER_OTLP_LOG_PROTOCOL=http
+OTEL_SERVICE_NAME=StorovShopping
