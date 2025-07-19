@@ -16,3 +16,4 @@ Test if the container is running by executing the curl command
 ```
 curl http://localhost:3000/  
 ```
+The output, Welcome to the Storov API! confirms the functioning of the api server
