@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect, createContext, setCurrentPage, useContext, useRef } from 'react'
-import reactLogo from './assets/react.svg'
 import './App.css'
 
 import {loadStripe} from '@stripe/stripe-js';
