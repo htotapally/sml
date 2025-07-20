@@ -4,6 +4,7 @@ WORKDIR /app
 COPY env /app/.env
 COPY index.html . 
 COPY images/ /app/images/
+COPY images/banners/ /app/images/banners/
 COPY package*.json .
 RUN npm install
 COPY . .
