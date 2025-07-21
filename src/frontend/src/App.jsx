@@ -16,6 +16,7 @@ import { ThemeContext } from './components/ThemeContext'
 import LoginPage from './components/LoginPage'
 import HomePage from './components/HomePage'
 import RegisterPage from './components/RegisterPage'
+import ReportsPage from './components/ReportsPage'
 import CartPage from './components/CartPage'
 import ProductsPage from './components/ProductsPage'
 import ProductCarousel from './components/ProductCarousel'
@@ -24,6 +25,7 @@ import OrderConfirmationPage from './components/OrderConfirmationPage'
 
 import Header from './components/Header'
 import Footer from './components/Footer'
+// import Reports from './components/Reports'
 
 function App({ children }) {
 
@@ -162,7 +164,10 @@ function App({ children }) {
 
           {currentPage === 'login' && <LoginPage setCurrentPage={setCurrentPage} />}
 
+          {currentPage === 'reports' && <ReportsPage setCurrentPage={setCurrentPage} />}
+
           {currentPage === 'register' && <RegisterPage setCurrentPage={setCurrentPage} />}
+
 
           {currentPage === 'products' && (
              <ProductsPage products={products} loading={loadingProducts} error={productError} fetchProducts={fetchProducts} globalSearchQuery={globalSearchQuery} setGlobalSearchQuery={setGlobalSearchQuery} />
