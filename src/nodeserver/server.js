@@ -13,12 +13,12 @@ const { v4: uuidv4 } = require('uuid');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); // Initialize Stripe with your secret key
 const nodemailer = require('nodemailer'); // Import Nodemailer
 
+const otel = require('@opentelemetry/api')
 const { LogLevel, ConsoleLogger } = require('@opentelemetry/core');
 const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-proto');
 const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-proto');
-
-const { ConsoleSpanExporter } = require('@opentelemetry/sdk-trace-node');
+// const { ConsoleSpanExporter } = require('@opentelemetry/sdk-trace-node');
 const {
   getNodeAutoInstrumentations,
 } = require('@opentelemetry/auto-instrumentations-node');
@@ -28,13 +28,32 @@ const {
   ConsoleMetricExporter,
 } = require('@opentelemetry/sdk-metrics');
 
+const {
+  LoggerProvider,
+  SimpleLogRecordProcessor,
+  ConsoleLogRecordExporter,
+  BatchLogRecordProcessor,
+} = require('@opentelemetry/sdk-logs');
+
 const { NodeSDK } = require('@opentelemetry/sdk-node');
+
+// Configure OTLPLogExporter
+const logExporter = new OTLPLogExporter({
+  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/logs', // Default OTLP log endpoint
+  // Add headers if required for authentication or specific collector configurations
+  headers: {
+    // 'signoz-access-token': process.env.SIGNOZ_INGESTION_KEY, // Example for SigNoz
+  },
+});
+
 const sdk = new NodeSDK({
-    traceExporter: new OTLPTraceExporter({
-      url: 'http://192.168.1.170:4318/v1/traces',
-      headers: {},
-    }),
-    metricReader: new PeriodicExportingMetricReader({
+  /*
+  logRecordProcessor: new BatchLogRecordProcessor(logExporter),
+  traceExporter: new OTLPTraceExporter({
+    url: 'http://192.168.1.170:4318/v1/traces',
+    headers: {},
+  }),
+  metricReader: new PeriodicExportingMetricReader({
     exporter: new OTLPMetricExporter({
       url: 'http://192.168.1.170:4318/v1/metrics',
       headers: {},
@@ -42,17 +61,12 @@ const sdk = new NodeSDK({
     }),
   }),
   instrumentations: [getNodeAutoInstrumentations()],
+  */
 });
 
 const logsAPI = require('@opentelemetry/api-logs');
 const { Resource } = require('@opentelemetry/resources');
 const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
-
-const {
-  LoggerProvider,
-  SimpleLogRecordProcessor,
-  ConsoleLogRecordExporter,
-} = require('@opentelemetry/sdk-logs');
 
 // Define a resource for your service
 console.log(Resource);
@@ -70,9 +84,25 @@ console.log(process.env.OTEL_SERVICE_NAME)
 const loggerProvider =
   new LoggerProvider({
     processors: [
+      /*
+      new SimpleLogRecordProcessor(
+        new OTLPTraceExporter({
+          url: 'http://192.168.1.170:4318/v1/traces',
+          headers: {},
+        })
+       //  new ConsoleLogRecordExporter()
+      ),
+      */
       new SimpleLogRecordProcessor(
         new ConsoleLogRecordExporter()
-      )
+      ),
+      // new BatchLogRecordProcessor(logExporter),
+      /*
+      new OTLPTraceExporter({
+        url: 'http://192.168.1.170:4318/v1/traces',
+        headers: {},
+      }),
+      */
     ],
     /*
     resource:
@@ -83,15 +113,34 @@ const loggerProvider =
 });
 console.log(loggerProvider)
 
-// Add a processor to export log record
 /*
-loggerProvider.addLogRecordProcessor(
-  new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())
-);
+// Create a tracer. Usually, tracer is a global variable.
+const tracer = otel.trace.getTracer('app_or_package_name', '1.0.0')
+// Create a root span (a trace) to measure some operation.
+tracer.startActiveSpan('main-operation', (main) => {
+  tracer.startActiveSpan('GET /posts/:id', (child1) => {
+    child1.setAttribute('http.method', 'GET')
+    child1.setAttribute('http.route', '/posts/:id')
+    child1.setAttribute('http.url', 'http://localhost:8080/posts/123')
+    child1.setAttribute('http.status_code', 200)
+    child1.recordException(new Error('error1'))
+    child1.end()
+  })
+
+  tracer.startActiveSpan('SELECT', (child2) => {
+    child2.setAttribute('db.system', 'mysql')
+    child2.setAttribute('db.statement', 'SELECT * FROM posts LIMIT 100')
+    child2.end()
+  })
+
+  // End the span when the operation we are measuring is done.
+  main.end()
+})
 */
 
 //  To create a log record, you first need to get a Logger instance
 const logger = loggerProvider.getLogger('server', '1.0.0');
+console.log(logger)
 
 // emit a log record
 logger.emit({
@@ -103,7 +152,8 @@ logger.emit({
 
 // Initialize Express app
 const app = express({
-  // traceExporter: new ConsoleSpanExporter(),
+  /*
+  traceExporter: new ConsoleSpanExporter(),
   traceExporter: new OTLPTraceExporter({
     url: 'http://192.168.1.170:4318/v1/traces',
     headers: {},
@@ -112,10 +162,19 @@ const app = express({
     exporter: new ConsoleMetricExporter(),
   }),
   instrumentations: [getNodeAutoInstrumentations()],
+  */
 });
 
 const nodeport = process.env.nodeport;
 console.log(nodeport)
+
+// emit a log record
+logger.emit({
+  severityNumber: logsAPI.SeverityNumber.INFO,
+  severityText: 'INFO',
+  body: 'this is a log record body',
+  attributes: { 'log.type': 'LogRecord' },
+});
 
 // --- Middleware ---
 app.use(cors());
@@ -129,6 +188,9 @@ const pool = new Pool({
   password: process.env.pgpassword,
   port: process.env.pgport
 });
+
+console.log(process.env.pghost)
+console.log(process.env.pgdatabase)
 
 // Test database connection on server startup
 pool.connect((err, client, release) => {
@@ -1512,4 +1574,34 @@ app.post('/api/create-payment-intent', async (req, res) => {
 app.listen(nodeport, () => {
     sdk.start();
     console.log("app running on port 3000...");
+
+/*
+    tracer.startActiveSpan('main', (main) => {
+      main.end()
+      console.log('trace id:', main.spanContext().traceId)
+    })
+
+// Create a root span (a trace) to measure some operation.
+tracer.startActiveSpan('main-operation', (main) => {
+  tracer.startActiveSpan('GET /posts/:id', (child1) => {
+    child1.setAttribute('http.method', 'GET')
+    child1.setAttribute('http.route', '/posts/:id')
+    child1.setAttribute('http.url', 'http://localhost:8089/')
+    child1.setAttribute('http.status_code', 200)
+    child1.recordException(new Error('error1'))
+    child1.end()
+  })
+
+  tracer.startActiveSpan('SELECT', (child2) => {
+    child2.setAttribute('db.system', 'mysql')
+    child2.setAttribute('db.statement', 'SELECT * FROM posts LIMIT 100')
+    child2.end()
+  })
+
+  // End the span when the operation we are measuring is done.
+  main.end()
+
+})
+*/
+
 })
