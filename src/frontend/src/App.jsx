@@ -52,6 +52,13 @@ function App({ children }) {
   const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
   console.log (IMAGE_BASE_URL)
 
+  // Superset related
+  const BackendURL = import.meta.env.VITE_BackendURL
+  const supersetDomain = import.meta.env.VITE_supersetDomain
+
+  // DashboardId mappings to be read from config files
+  const dashboardId = "00b809e7-324b-4204-affb-abc41af6e71c"
+
   // const [loadingProducts, setLoadingProducts] = useState(false)
 
   // Function to fetch products
@@ -148,8 +155,11 @@ function App({ children }) {
     globalSearchQuery, 
     setGlobalSearchQuery, 
     guestSessionId, 
-    setGuestSessionId}), 
-    [ {user, token, handleLogin, handleLogout, API_BASE_URL, IMAGE_BASE_URL, setCurrentPage, globalSearchQuery, setGlobalSearchQuery, guestSessionId, setGuestSessionId }]);
+    setGuestSessionId,
+    BackendURL,
+    dashboardId,
+    supersetDomain}), 
+    [ {user, token, handleLogin, handleLogout, API_BASE_URL, IMAGE_BASE_URL, setCurrentPage, globalSearchQuery, setGlobalSearchQuery, guestSessionId, setGuestSessionId, BackendURL, dashboardId, supersetDomain}]);
 
   return (
     <ThemeContext.Provider value={contextValue}>
