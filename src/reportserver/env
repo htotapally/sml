@@ -1,4 +1,4 @@
-SERVERPORT=3001
+SERVERPORT=<port number for report server to b eexposed>
 
 SSUSERNAME=<Replace with superset username>
 SSPASSWORD=<Replace with supereset user password>
