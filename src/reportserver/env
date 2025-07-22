@@ -1,8 +1,8 @@
 SERVERPORT=3001
 
-SSUSERNAME=hara
-SSPASSWORD=H0peless!
+SSUSERNAME=<Replace with superset username>
+SSPASSWORD=<Replace with supereset user password>
 SSPROVIDER=db
 
-SSHOST=http://192.168.1.170:8088
+SSHOST=<Replace with superset url>  // Example: http://xxx.xxx.xxx.xxx:8088 
 
