@@ -1,5 +1,6 @@
-VITE_API_BASE_URL=https://k8smaster.example.net
-VITE_IMAGE_BASE_URL=https://k8smaster.example.net
+VITE_API_ORDER_URL=http://192.168.1.153:3002
+VITE_API_BASE_URL=http://192.168.1.153:3000
+VITE_IMAGE_BASE_URL=http://192.168.1.153:8089
 
 VITE_BackendURL=http://192.168.1.153:3001
 VITE_supersetDomain=http://192.168.1.170:8088
