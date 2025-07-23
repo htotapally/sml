@@ -3,7 +3,7 @@ import { ThemeContext } from './ThemeContext'
 
 function CartPage({ setOrderSummary, setCurrentPage }) {
 
-          const { user, token, API_BASE_URL, IMAGE_BASE_URL, guestSessionId, setGuestSessionId } = useContext(ThemeContext);
+          const { user, token, API_ORDER_URL, IMAGE_BASE_URL, guestSessionId, setGuestSessionId } = useContext(ThemeContext);
           const [cart, setCart] = useState(null);
           const [loading, setLoading] = useState(true);
           const [error, setError] = useState(null);
@@ -49,7 +49,7 @@ function CartPage({ setOrderSummary, setCurrentPage }) {
                 headers['X-Guest-Session-Id'] = newGuestId; // Send the newly generated ID
               }
 
-              const response = await fetch(`${API_BASE_URL}/api/cart`, { headers });
+              const response = await fetch(`${API_ORDER_URL}/api/cart`, { headers });
               const data = await response.json();
 
               // Check for new guest session ID from response headers
@@ -87,7 +87,7 @@ function CartPage({ setOrderSummary, setCurrentPage }) {
                 headers['X-Guest-Session-Id'] = guestSessionId;
               }
 
-              const response = await fetch(`${API_BASE_URL}/api/cart/update/${productId}`, {
+              const response = await fetch(`${API_ORDER_URL}/api/cart/update/${productId}`, {
                 method: 'PUT',
                 headers: headers,
                 body: JSON.stringify({ quantity: newQuantity })
@@ -121,7 +121,7 @@ function CartPage({ setOrderSummary, setCurrentPage }) {
                 headers['X-Guest-Session-Id'] = guestSessionId;
               }
 
-              const response = await fetch(`${API_BASE_URL}/api/cart/remove/${productId}`, {
+              const response = await fetch(`${API_ORDER_URL}/api/cart/remove/${productId}`, {
                 method: 'DELETE',
                 headers: headers
               });
@@ -178,7 +178,7 @@ function CartPage({ setOrderSummary, setCurrentPage }) {
                 }
               }
 
-              const response = await fetch(`${API_BASE_URL}/api/orders/place`, {
+              const response = await fetch(`${API_ORDER_URL}/api/orders/place`, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(bodyData)
@@ -246,7 +246,7 @@ function CartPage({ setOrderSummary, setCurrentPage }) {
             setPaymentSuccess(null);
             try {
               // 1. Get client secret from backend
-              const response = await fetch(`${API_BASE_URL}/api/create-payment-intent`, {
+              const response = await fetch(`${API_ORDER_URL}/api/create-payment-intent`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount: parseInt(parseFloat(calculateTotal()) * 100) }) // amount in cents
@@ -280,7 +280,7 @@ function CartPage({ setOrderSummary, setCurrentPage }) {
                   headers['Authorization'] = `Bearer ${token}`;
                 }
                
-                const orderResponse = await fetch(`${API_BASE_URL}/api/orders/place`, {
+                const orderResponse = await fetch(`${API_ORDER_URL}/api/orders/place`, {
                   method: 'POST',
                   headers: headers,
                   body: JSON.stringify(orderBody)
