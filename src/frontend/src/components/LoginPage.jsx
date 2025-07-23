@@ -3,7 +3,7 @@ import { ThemeContext } from './ThemeContext'
 
 function LoginPage({ setCurrentPage }) {
 
-  const { handleLogin, API_BASE_URL } = useContext(ThemeContext);
+  const { handleLogin, API_ORDER_URL } = useContext(ThemeContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,7 +15,7 @@ function LoginPage({ setCurrentPage }) {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(`${API_ORDER_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
