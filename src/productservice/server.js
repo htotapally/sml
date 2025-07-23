@@ -15,7 +15,7 @@ const { LogLevel, ConsoleLogger } = require('@opentelemetry/core');
 const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-proto');
 const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-proto');
-// const { ConsoleSpanExporter } = require('@opentelemetry/sdk-trace-node');
+const { ConsoleSpanExporter } = require('@opentelemetry/sdk-trace-node');
 const {
   getNodeAutoInstrumentations,
 } = require('@opentelemetry/auto-instrumentations-node');
@@ -44,7 +44,6 @@ const logExporter = new OTLPLogExporter({
 });
 
 const sdk = new NodeSDK({
-  /*
   logRecordProcessor: new BatchLogRecordProcessor(logExporter),
   traceExporter: new OTLPTraceExporter({
     url: 'http://192.168.1.170:4318/v1/traces',
@@ -58,7 +57,6 @@ const sdk = new NodeSDK({
     }),
   }),
   instrumentations: [getNodeAutoInstrumentations()],
-  */
 });
 
 const logsAPI = require('@opentelemetry/api-logs');
@@ -72,7 +70,6 @@ console.log(process.env.OTEL_SERVICE_NAME)
 const loggerProvider =
   new LoggerProvider({
     processors: [
-      /*
       new SimpleLogRecordProcessor(
         new OTLPTraceExporter({
           url: 'http://192.168.1.170:4318/v1/traces',
@@ -80,17 +77,14 @@ const loggerProvider =
         })
        //  new ConsoleLogRecordExporter()
       ),
-      */
       new SimpleLogRecordProcessor(
         new ConsoleLogRecordExporter()
       ),
       // new BatchLogRecordProcessor(logExporter),
-      /*
       new OTLPTraceExporter({
         url: 'http://192.168.1.170:4318/v1/traces',
         headers: {},
       }),
-      */
     ],
     /*
     resource:
@@ -107,7 +101,6 @@ console.log(logger)
 
 // Initialize Express app
 const app = express({
-  /*
   traceExporter: new ConsoleSpanExporter(),
   traceExporter: new OTLPTraceExporter({
     url: 'http://192.168.1.170:4318/v1/traces',
@@ -117,7 +110,6 @@ const app = express({
     exporter: new ConsoleMetricExporter(),
   }),
   instrumentations: [getNodeAutoInstrumentations()],
-  */
 });
 
 const nodeport = process.env.nodeport;
@@ -161,6 +153,7 @@ pool.connect((err, client, release) => {
       process.exit(1);
     }
     console.log('Database connected successfully at:', result.rows[0].now);
+    /*
     // emit a log record
     logger.emit({
       severityNumber: logsAPI.SeverityNumber.INFO,
@@ -168,7 +161,7 @@ pool.connect((err, client, release) => {
       body: 'Database connected successfully at:',
       attributes: { 'log.type': 'LogRecord' },
     });
-
+    */
   });
 });
 
@@ -278,7 +271,6 @@ app.get('/api/products', async (req, res) => {
     q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0
   } = req.query;
 
-  console.log("============== " + q)
   try {
     const products = await instance.getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit, offset)
     res.json(products);

@@ -10,4 +10,4 @@ pgpassword=justskipline123
 pgport=5432
 
 OTEL_EXPORTER_OTLP_LOG_PROTOCOL=http
-OTEL_SERVICE_NAME=StorovShopping
+OTEL_SERVICE_NAME=ProductService
