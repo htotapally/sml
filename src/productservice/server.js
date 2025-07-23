@@ -136,6 +136,15 @@ const pool = new Pool({
   port: process.env.pgport
 });
 
+const user = process.env.pguser
+const host = process.env.pghost
+const database = process.env.pgdatabase
+const password = process.env.pgpassword
+const port = process.env.pgport
+
+const ProductProvider = require('./ProductProvider');
+const instance = new ProductProvider(user, host, database, password, port);
+
 console.log(process.env.pghost)
 console.log(process.env.pgdatabase)
 
@@ -270,78 +279,9 @@ app.get('/api/products', async (req, res) => {
     limit = 20, offset = 0
   } = req.query;
 
-  let query = 'SELECT * FROM products';
-  const queryParams = [];
-  const conditions = [];
-  let paramIndex = 1;
-
-  if (q) {
-    conditions.push(`(title ILIKE $${paramIndex} OR description ILIKE $${paramIndex} OR EXISTS (SELECT 1 FROM UNNEST(tags) AS tag WHERE tag ILIKE $${paramIndex}))`);
-    queryParams.push(`%${q}%`);
-    paramIndex++;
-  }
-  if (category) {
-    conditions.push(`EXISTS (SELECT 1 FROM UNNEST(categories) AS cat WHERE cat ILIKE $${paramIndex})`);
-    queryParams.push(`%${category}%`);
-    paramIndex++;
-  }
-  if (brand) {
-    conditions.push(`EXISTS (SELECT 1 FROM UNNEST(brands) AS b WHERE b ILIKE $${paramIndex})`);
-    queryParams.push(`%${brand}%`);
-    paramIndex++;
-  }
-  if (min_price && !isNaN(parseFloat(min_price))) {
-    conditions.push(`(price_info->>'price')::numeric >= $${paramIndex}`);
-    queryParams.push(parseFloat(min_price));
-    paramIndex++;
-  }
-  if (max_price && !isNaN(parseFloat(max_price))) {
-    conditions.push(`(price_info->>'price')::numeric <= $${paramIndex}`);
-    queryParams.push(parseFloat(max_price));
-    paramIndex++;
-  }
-  if (availability) {
-    conditions.push(`availability = $${paramIndex}`);
-    queryParams.push(availability.toUpperCase());
-    paramIndex++;
-  }
-
-  if (conditions.length > 0) {
-    query += ' WHERE ' + conditions.join(' AND ');
-  }
-
-  let orderBy = 'ORDER BY title ASC';
-  if (sort_by) {
-    switch (sort_by) {
-      case 'price_asc':
-        orderBy = 'ORDER BY (price_info->>\'price\')::numeric ASC';
-        break;
-      case 'price_desc':
-        orderBy = 'ORDER BY (price_info->>\'price\')::numeric DESC';
-        break;
-      case 'title_asc':
-        orderBy = 'ORDER BY title ASC';
-        break;
-      case 'title_desc':
-        orderBy = 'ORDER BY title DESC';
-        break;
-      default:
-        break;
-    }
-  }
-  query += ' ' + orderBy;
-
-  query += ` LIMIT $${paramIndex}`;
-  queryParams.push(parseInt(limit));
-  paramIndex++;
-
-  query += ` OFFSET $${paramIndex}`;
-  queryParams.push(parseInt(offset));
-  paramIndex++;
-
   try {
-    const result = await pool.query(query, queryParams);
-    res.json(result.rows);
+    const products = await instance.getAllProducts()
+    res.json(products);
   } catch (err) {
     console.error('Error fetching products with filters:', err.stack);
     res.status(500).json({ error: 'Internal Server Error', details: err.message });
@@ -514,6 +454,17 @@ app.get('/api/admin/products', authenticateAdminToken, async (req, res) => {
 app.post('/api/admin/products', authenticateAdminToken, async (req, res) => {
     const { id, title, description, price_info, categories, brands, available_quantity, images, tags } = req.body;
 
+    const user = process.env.pguser
+    const host = process.env.pghost
+    const database = process.env.pgdatabase
+    const password = process.env.pgpassword
+    const port = process.env.pgport
+
+    const ProductProvider = require('./ProductProvider');
+    const instance = new ProductProvider(user, host, database, password, port);
+    const products = await instance.getAllProducts(id, title, description, price_info, categories, brands, available_quantity, images, tags)
+    console.log(products)
+
     if (!id || !title || !price_info || !price_info.price || !price_info.currencyCode || available_quantity === undefined) {
         return res.status(400).json({ message: 'Product ID, title, price, currency, and available quantity are required.' });
     }
@@ -592,7 +543,17 @@ app.put('/api/admin/products/:id/price', authenticateAdminToken, async (req, res
 
 // now run the application and start listening on port nodeport
 app.listen(nodeport, () => {
-    sdk.start();
-    console.log(`app running on port ${nodeport}...`);
+  sdk.start();
+  console.log(`app running on port ${nodeport}...`);
 
+  const user = process.env.pguser
+  const host = process.env.pghost
+  const database = process.env.pgdatabase
+  const password = process.env.pgpassword
+  const port = process.env.pgport
+
+  const ProductProvider = require('./ProductProvider');
+  const instance = new ProductProvider(user, host, database, password, port);
+  instance.greet();
+  
 })
