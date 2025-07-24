@@ -1,6 +1,13 @@
 const { Pool } = require('pg');
 
 class ProductProvider {
+  /**
+   * @param {user} user
+   * @param {host} host
+   * @param {database} database
+   * @param {password} password
+   * @param {port} port
+   */
   constructor(user, host, database, password, port) {
     // --- PostgreSQL Connection Pool Configuration ---
     const pool = new Pool({

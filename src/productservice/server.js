@@ -10,12 +10,19 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 
+/*
 const otel = require('@opentelemetry/api')
+*/
+
 const { LogLevel, ConsoleLogger } = require('@opentelemetry/core');
 const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-proto');
 const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-proto');
 const { ConsoleSpanExporter } = require('@opentelemetry/sdk-trace-node');
+
+// const {otel, LogLevel, ConsoleLogger, OTLPLogExporter, OTLPTraceExporter, OTLPMetricExporter, ConsoleSpanExporter} = require('./common')
+// const {otel, LogLevel, ConsoleLogger, OTLPLogExporter} = require('./common')
+
 const {
   getNodeAutoInstrumentations,
 } = require('@opentelemetry/auto-instrumentations-node');
@@ -34,9 +41,11 @@ const {
 
 const { NodeSDK } = require('@opentelemetry/sdk-node');
 
+const OTEL_COLLECTOR_HOST = process.env.OTEL_COLLECTOR_HOST
+
 // Configure OTLPLogExporter
 const logExporter = new OTLPLogExporter({
-  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/logs', // Default OTLP log endpoint
+  url: `${OTEL_COLLECTOR_HOST}/v1/logs` || 'http://localhost:4318/v1/logs', // Default OTLP log endpoint
   // Add headers if required for authentication or specific collector configurations
   headers: {
     // 'signoz-access-token': process.env.SIGNOZ_INGESTION_KEY, // Example for SigNoz
@@ -46,12 +55,12 @@ const logExporter = new OTLPLogExporter({
 const sdk = new NodeSDK({
   logRecordProcessor: new BatchLogRecordProcessor(logExporter),
   traceExporter: new OTLPTraceExporter({
-    url: 'http://192.168.1.170:4318/v1/traces',
+    url: `${OTEL_COLLECTOR_HOST}/v1/traces`,
     headers: {},
   }),
   metricReader: new PeriodicExportingMetricReader({
     exporter: new OTLPMetricExporter({
-      url: 'http://192.168.1.170:4318/v1/metrics',
+      url: `${OTEL_COLLECTOR_HOST}/v1/metrics`,
       headers: {},
       concurrencyLimit: 1,
     }),
@@ -72,7 +81,7 @@ const loggerProvider =
     processors: [
       new SimpleLogRecordProcessor(
         new OTLPTraceExporter({
-          url: 'http://192.168.1.170:4318/v1/traces',
+          url: `${OTEL_COLLECTOR_HOST}/v1/traces`,
           headers: {},
         })
        //  new ConsoleLogRecordExporter()
@@ -82,7 +91,7 @@ const loggerProvider =
       ),
       // new BatchLogRecordProcessor(logExporter),
       new OTLPTraceExporter({
-        url: 'http://192.168.1.170:4318/v1/traces',
+        url: `${OTEL_COLLECTOR_HOST}/v1/traces`,
         headers: {},
       }),
     ],
@@ -103,7 +112,7 @@ console.log(logger)
 const app = express({
   traceExporter: new ConsoleSpanExporter(),
   traceExporter: new OTLPTraceExporter({
-    url: 'http://192.168.1.170:4318/v1/traces',
+    url: `${OTEL_COLLECTOR_HOST}/v1/traces`,
     headers: {},
   }),
   metricReader: new PeriodicExportingMetricReader({
@@ -136,34 +145,6 @@ const port = process.env.pgport
 
 const ProductProvider = require('./ProductProvider');
 const instance = new ProductProvider(user, host, database, password, port);
-
-console.log(process.env.pghost)
-console.log(process.env.pgdatabase)
-
-// Test database connection on server startup
-pool.connect((err, client, release) => {
-  if (err) {
-    console.error('Error acquiring client for initial DB connection test:', err.stack);
-    process.exit(1);
-  }
-  client.query('SELECT NOW()', (err, result) => {
-    release();
-    if (err) {
-      console.error('Error executing initial DB query:', err.stack);
-      process.exit(1);
-    }
-    console.log('Database connected successfully at:', result.rows[0].now);
-    /*
-    // emit a log record
-    logger.emit({
-      severityNumber: logsAPI.SeverityNumber.INFO,
-      severityText: 'INFO',
-      body: 'Database connected successfully at:',
-      attributes: { 'log.type': 'LogRecord' },
-    });
-    */
-  });
-});
 
 // --- Authentication Middleware (for customer portal) ---
 const authenticateToken = (req, res, next) => {
@@ -266,6 +247,12 @@ app.get('/', (req, res) => {
 });
 
 // --- PRODUCT ENDPOINTS (PUBLIC) ---
+/**
+ * @api {get} /user/ Request all products
+ *
+ *
+ * @apiSuccess {allproducts} All PRoducts
+ */
 app.get('/api/products', async (req, res) => {
   const {
     q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0
