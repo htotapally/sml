@@ -10,6 +10,9 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 
+const fs = require('fs');
+const { json } = require("@remix-run/node");
+
 /*
 const otel = require('@opentelemetry/api')
 */
@@ -251,7 +254,7 @@ app.get('/', (req, res) => {
  * @api {get} /user/ Request all products
  *
  *
- * @apiSuccess {allproducts} All PRoducts
+ * @apiSuccess {allproducts} All Products
  */
 app.get('/api/products', async (req, res) => {
   const {
@@ -260,7 +263,8 @@ app.get('/api/products', async (req, res) => {
 
   try {
     const products = await instance.getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit, offset)
-    res.json(products);
+    console.log(JSON.parse(products))
+    await res.json(JSON.parse(products));
   } catch (err) {
     console.error('Error fetching products with filters:', err.stack);
     res.status(500).json({ error: 'Internal Server Error', details: err.message });
@@ -533,6 +537,6 @@ app.listen(nodeport, () => {
 
   const ProductProvider = require('./ProductProvider');
   const instance = new ProductProvider(user, host, database, password, port);
-  instance.greet();
+  // instance.greet();
   
 })

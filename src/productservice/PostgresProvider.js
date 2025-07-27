@@ -1,9 +1,8 @@
-const { Pool } = require('pg');
+
 const fs = require('fs');
 const { json } = require("@remix-run/node");
-const SolrProvider = require('./SolrProvider');
 
-class ProductProvider {
+class PostgresProvider {
   /**
    * @param {user} user
    * @param {host} host
@@ -12,6 +11,7 @@ class ProductProvider {
    * @param {port} port
    */
   constructor(user, host, database, password, port) {
+    // --- PostgreSQL Connection Pool Configuration ---
     const pool = new Pool({
       user: user,
       host: host,
@@ -20,14 +20,51 @@ class ProductProvider {
       port: port})
 
     this.pool = pool;
-    const instance = new SolrProvider(user, host, database, password, port);
-    this.instance = instance
+  }
+
+  // Test database connection on server startup
+  greet() {
+
+    // Test database connection on server startup
+    this.pool.connect((err, client, release) => {
+      if (err) {
+        console.error('Error acquiring client for initial DB connection test:', err.stack);
+        process.exit(1);
+      }
+
+      client.query('SELECT NOW()', (err, result) => {
+        release();
+        if (err) {
+          console.error('Error executing initial DB query:', err.stack);
+          process.exit(1);
+        }
+
+        console.log('Database connected successfully at:', result.rows[0].now);
+      });
+
+    }); 
   }
 
   async getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {
     console.log("Executng getAllProducts")
     try {
-      const products = this.instance.getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0)
+      const products = fs.readFileSync('./products.json', 'utf8')
+
+      /*
+      fs.readFile('./products.json', 'utf8', (err, products) => {
+        if (err) {
+          console.error('Error reading file:', err);
+          return;
+        }
+        
+        console.log("From Product Ineer")
+        console.log(products)
+        await callback(products)
+        return products
+      });
+      */
+
+      // console.log(JSON.parse(products))
       return products;
     } catch (err) {
       console.error('Error fetching products with filters:', err.stack);
@@ -209,4 +246,4 @@ class ProductProvider {
 
 }
 
-module.exports = ProductProvider;
+module.exports = PostgresProvider;
