@@ -6,7 +6,7 @@ docker build -t htotapally/productapi  .
 ```
 Create docker container  
 ```
-docker run --name productapi -d -p 3000:3000 htotapally/productapi   
+docker run --name producsvc -d -p 3000:3000 htotapally/productapi   
 ```
 Tail log file  
 ```
