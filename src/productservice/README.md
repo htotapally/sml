@@ -10,7 +10,7 @@ docker run --name productapi -d -p 3000:3000 htotapally/productapi
 ```
 Tail log file  
 ```
-docker logs storovapi  --follow  
+docker logs productapi  --follow  
 ```
 Test if the container is running by executing the curl command
 ```
