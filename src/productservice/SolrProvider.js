@@ -26,9 +26,13 @@ class SolrProvider {
   }
 
   async getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {
-    console.log("Executng getAllProducts")
+    console.log("Executng getAllProducts and include query filters: " + q)
+    console.log(category)
     try {
-      const query = this.solrendpoint + '/' + this.solrcollection + '/query?q=*:*&q.op=OR&indent=true&useParams='
+      let query = this.generateQuery(q, category, brand, min_price, max_price, availability, sort_by, limit, offset)
+      query = this.solrendpoint + '/' + this.solrcollection + '/query?' + query
+
+      console.log(query)
       const resp = await fetch(query)
       const body = await resp.json()
 
@@ -39,6 +43,39 @@ class SolrProvider {
     }
   }
 
+  generateQuery(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {
+    console.log("Generating query")
+    let query = 'q=*:*'
+
+    if (q) {
+      query = 'q=all_str:*' + q + '*' 
+    }
+
+    if (category) {
+      query = query + '&q.op=AND&fq=categories:' + category + '*'
+    }
+
+    if (brand) {
+      query = query + '&q.op=AND&fq=brands:' + brand + '*'
+    }
+
+    if (availability) {
+      query = query + '&q.op=AND&fq=availability:' + 'IN_STOCK'
+    }
+
+    if (min_price && !isNaN(parseFloat(min_price))) {
+      query = query + '&q.op=AND&fq=price_info.price:[' + min_price + ' TO *]' 
+    }
+
+    if (max_price && !isNaN(parseFloat(max_price))) {
+      query = query + '&q.op=AND&fq=price_info.price:[* TO ' + max_price + ']'
+    }
+    
+    console.log(query) 
+    return query
+  }
+
+  /*
   async getAllProductsNot(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {
     let query = 'SELECT * FROM products';
     const queryParams = [];
@@ -121,6 +158,7 @@ class SolrProvider {
       res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
   }
+  */
 
 }
 
