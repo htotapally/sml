@@ -147,7 +147,6 @@ const password = process.env.pgpassword
 const port = process.env.pgport
 
 const ProductProvider = require('./ProductProvider');
-const instance = new ProductProvider(user, host, database, password, port);
 
 // --- Authentication Middleware (for customer portal) ---
 const authenticateToken = (req, res, next) => {
@@ -262,9 +261,8 @@ app.get('/api/products', async (req, res) => {
   } = req.query;
 
   try {
-    const products = await instance.getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit, offset)
-    console.log(JSON.parse(products))
-    await res.json(JSON.parse(products));
+    const products = await this.instance.getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit, offset)
+    res.json(products);
   } catch (err) {
     console.error('Error fetching products with filters:', err.stack);
     res.status(500).json({ error: 'Internal Server Error', details: err.message });
@@ -535,8 +533,12 @@ app.listen(nodeport, () => {
   const password = process.env.pgpassword
   const port = process.env.pgport
 
+  const solrendpoint = process.env.solrendpoint
+  console.log("server.js " + solrendpoint)
+  const solrcollection = process.env.solrcollection
+  console.log("server.js " + solrcollection)
+
   const ProductProvider = require('./ProductProvider');
-  const instance = new ProductProvider(user, host, database, password, port);
-  // instance.greet();
-  
+  const instance = new ProductProvider(user, host, database, password, port, solrendpoint, solrcollection);
+  this.instance = instance
 })
