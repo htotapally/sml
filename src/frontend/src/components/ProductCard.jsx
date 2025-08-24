@@ -5,7 +5,7 @@ import { ThemeContext } from './ThemeContext'
 
 function ProductCard({product}) {
 
-  const { user, token, API_BASE_URL, IMAGE_BASE_URL, guestSessionId, setGuestSessionId } = useContext(ThemeContext);
+  const { user, token, IMAGE_BASE_URL, API_ORDER_URL, guestSessionId, setGuestSessionId } = useContext(ThemeContext);
   const [addingToCart, setAddingToCart] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success' or 'error'
@@ -35,7 +35,7 @@ function ProductCard({product}) {
       return;
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
+    const response = await fetch(`${API_ORDER_URL}/api/cart/add`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify({ product_id: product.id, quantity: 1 })
