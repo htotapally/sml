@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ThemeContext } from './ThemeContext'
-
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 import ProductCard from './ProductCard'
 
 function ProductsPage({ products, loading, error, fetchProducts }) {
@@ -15,7 +16,10 @@ function ProductsPage({ products, loading, error, fetchProducts }) {
             availability: '',
             sort_by: 'title_asc',
             limit: 20,
-            offset: 0
+            offset: 0,
+            batchnum: '',
+            sellbefore: '',
+            manufactured: ''
           });
           const [allProducts, setAllProducts] = useState([]); // To store products from this page's fetch
           const [pageLoading, setPageLoading] = useState(false);
@@ -46,6 +50,18 @@ function ProductsPage({ products, loading, error, fetchProducts }) {
           const handlePagination = (newOffset) => {
             setSearchParams({ ...searchParams, offset: newOffset });
           };
+
+          const handleBatchnumChange = (e) => {
+            setSearchParams({ ...searchParams, [e.target.name]: e.target.value});
+          }
+
+          const handleSellbeforeChange = (date) => {
+            setSearchParams({ ...searchParams, sellbefore: date});
+          }
+
+          const handleManufacturedChange = (date) => {
+            setSearchParams({ ...searchParams, manufactured: date});
+          }
 
           const fetchFilteredProducts = async () => {
             // Products page no longer requires token, but if it exists, send it.
@@ -192,6 +208,49 @@ function ProductsPage({ products, loading, error, fetchProducts }) {
                     <option value="BACKORDER">Backorder</option>
                   </select>
                 </div>
+
+                {/* Batch Number Filter */}
+                <div>
+                  <label htmlFor="batchnum" className="block text-sm font-medium text-gray-700">Batch Number</label>
+                  <input
+                    type="text"
+                    id="batchnum"
+                    name="batchnum"
+                    placeholder="e.g., B1234"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    value={searchParams.batchnum}
+                    onChange={handleBatchnumChange}
+                    isClearable
+                  />
+                </div>
+
+                {/* Sell Before Date Filter */}
+                <div>
+                  <label htmlFor="sellbefore" className="block text-sm font-medium text-gray-700">Sell Before</label>
+                  <DatePicker
+                    selected={searchParams.sellbefore}
+                    onChange={handleSellbeforeChange}
+                    dateFormat="yyyy-MM-dd"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    placeholderText="Select a date"
+                    value={searchParams.sellbefore || ''}
+                    isClearable
+                  />
+                </div>
+
+                {/* Manufactured Date Filter */}
+                <div>
+                  <label htmlFor="manufactured" className="block text-sm font-medium text-gray-700">Manufactured On</label>
+                  <DatePicker
+                    selected={searchParams.manufactured}
+                    onChange={handleManufacturedChange}
+                    dateFormat="yyyy-MM-dd"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    placeholderText="Select a date"
+                    value={searchParams.manufactured || ''}
+                    isClearable
+                  />
+                </div>  
 
                 {/* Sort By */}
                 <div>
