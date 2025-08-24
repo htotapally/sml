@@ -1,4 +1,3 @@
-const { json } = require("@remix-run/node")
 const DocToProductTransformer = require('./DocToProductTransformer')
 
 class SolrProvider {
@@ -26,7 +25,6 @@ class SolrProvider {
       console.log(query)
       const resp = await fetch(query)
       const body = await resp.json()
-      console.log(body)
       const docToProductTransformer = new DocToProductTransformer()
       const products = docToProductTransformer.Transform(body)
       return products;
