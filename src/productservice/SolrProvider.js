@@ -1,5 +1,5 @@
-const { Pool } = require('pg')
 const { json } = require("@remix-run/node")
+const DocToProductTransformer = require('./DocToProductTransformer')
 
 class SolrProvider {
   /**
@@ -12,38 +12,31 @@ class SolrProvider {
    * @param {solrcollection} solrcollection
    */
   constructor(user, host, database, password, port, solrendpoint, solrcollection) {
-    const pool = new Pool({
-      user: user,
-      host: host,
-      database: database,
-      password: password,
-      port: port})
-
     this.solrendpoint = solrendpoint
     this.solrcollection = solrcollection
-
-    this.pool = pool;
   }
 
-  async getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {
+  async getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, batchnum, sellbefore, manufactured, limit = 20, offset = 0) {
     console.log("Executng getAllProducts and include query filters: " + q)
     console.log(category)
     try {
-      let query = this.generateQuery(q, category, brand, min_price, max_price, availability, sort_by, limit, offset)
+      let query = this.generateQuery(q, category, brand, min_price, max_price, availability, sort_by, batchnum, sellbefore, manufactured, limit, offset)
       query = this.solrendpoint + '/' + this.solrcollection + '/query?' + query
 
       console.log(query)
       const resp = await fetch(query)
       const body = await resp.json()
-
-      return body;
+      console.log(body)
+      const docToProductTransformer = new DocToProductTransformer()
+      const products = docToProductTransformer.Transform(body)
+      return products;
     } catch (err) {
       console.error('Error fetching products with filters:', err.stack);
       res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
   }
 
-  generateQuery(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {
+  generateQuery(q, category, brand, min_price, max_price, availability, batchnum, sellbefore, manufactured, sort_by, limit = 20, offset = 0) {
     console.log("Generating query")
     let query = 'q=*:*'
 
