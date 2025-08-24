@@ -11,8 +11,6 @@ Use docker compose to run the database
 This works for now
 ```
 docker run --name=postgres -e POSTGRES_PASSWORD=<PASSWORD> -e POSTGRES_DB=world -d -p 5432:5432 --network=host -v postgres_data:/var/lib/postgresql/data htotapally/sml-postgres-db
-docker run --name=postgres -e POSTGRES_USER=storov_user -e POSTGRES_PASSWORD=justskipline123 -e POSTGRES_DB=jsl -d --network=host -v postgres_data:/var/lib/postgresql/data ./init.sql:/docker-entrypoint-initdb.d/init.sql htotapally/sml-postgres-db  
-
 ```
 
 MORE WORK IS NEEDED FOR THE FOLLOWING  
@@ -20,6 +18,8 @@ MORE WORK IS NEEDED FOR THE FOLLOWING
 docker run --name=world -e POSTGRES_PASSWORD=<PASSWORD> -d -p 5432:5432 --network=host -v postgres_data:/var/lib/postgresql/data postgres
 
 docker run --name=world -e POSTGRES_PASSWORD=<PASSWORD> -d -p 5432:5432 --network=host -v ./init.sql:/docker-entrypoint-initdb.d/init.sql postgres
+
+docker run --name=postgres -e POSTGRES_USER=storov_user -e POSTGRES_PASSWORD=justskipline123 -e POSTGRES_DB=jsl -d --network=host -v postgres_data:/var/lib/postgresql/data ./init.sql:/docker-entrypoint-initdb.d/init.sql htotapally/sml-postgres-db
 ```
 
 ## Requirements
@@ -68,6 +68,7 @@ CREATE TABLE onlineorders (
 );
 ```
 
+
 ### Few troubleshooting steps
 
 To dispaly data directory  
@@ -97,3 +98,20 @@ SELECT * FROM pg_catalog.pg_tables;
 
  
 
+ALTER TABLE products
+ADD COLUMN batchnum VARCHAR(20),
+ADD COLUMN manufactured DATE,
+ADD COLUMN sellbefore DATE;
+
+UPDATE products
+SET sellbefore = CURRENT_TIMESTAMP;
+
+UPDATE products
+SET batchnum = 'somebatch';
+
+UPDATE
+SET manufactured = '2025-07-24';
+
+update products set  manufactured='2025-06-25';
+
+jsl=# select * from products;
