@@ -1,4 +1,4 @@
-
+const { Pool } = require('pg');
 const fs = require('fs');
 const { json } = require("@remix-run/node");
 
@@ -45,7 +45,7 @@ class PostgresProvider {
     }); 
   }
 
-  async getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {
+  async getAllProductsNot(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {
     console.log("Executng getAllProducts")
     try {
       const products = fs.readFileSync('./products.json', 'utf8')
@@ -161,7 +161,7 @@ class PostgresProvider {
     */
   }
 
-  async getAllProductsNot(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {
+  async getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, batchnum, sellbefore, manufactured, limit = 20, offset = 0) {
     let query = 'SELECT * FROM products';
     const queryParams = [];
     const conditions = [];
@@ -202,6 +202,31 @@ class PostgresProvider {
       paramIndex++;
     }
 
+    if (batchnum) {
+      console.log("Batch number filter:", batchnum);
+      conditions.push(`(batchnum = $${paramIndex})`);
+      queryParams.push(batchnum);
+      paramIndex++;
+    }
+    
+    if(sellbefore) {
+      console.log("Sell before filter:", sellbefore);
+      const sellbeforeDate = new Date(sellbefore);
+      conditions.push(`(sellbefore <= $${paramIndex})`);
+      queryParams.push(sellbeforeDate);
+      paramIndex++;
+
+    }
+
+    if(manufactured) {
+      console.log("Manufactured filter:", manufactured);
+      const manufacturedDate = new Date(manufactured);
+      conditions.push(`(manufactured <= $${paramIndex})`);
+      queryParams.push(manufacturedDate);
+      paramIndex++;
+
+    }
+
     if (conditions.length > 0) {
       query += ' WHERE ' + conditions.join(' AND ');
     }
@@ -235,9 +260,10 @@ class PostgresProvider {
     queryParams.push(parseInt(offset));
     paramIndex++;
 
+    console.log("Final Query:", query);
     try {
-      const result = await pool.query(query, queryParams);
-      res.json(result.rows);
+      const result = await this.pool.query(query, queryParams);
+      return result.rows;
     } catch (err) {
       console.error('Error fetching products with filters:', err.stack);
       res.status(500).json({ error: 'Internal Server Error', details: err.message });

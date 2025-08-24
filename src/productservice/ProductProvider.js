@@ -2,6 +2,7 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const { json } = require("@remix-run/node");
 const SolrProvider = require('./SolrProvider');
+const PostgresProvider = require('./PostgresProvider');
 const DocToProductTranformer = require('./DocToProductTranformer')
 
 class ProductProvider {
@@ -13,6 +14,7 @@ class ProductProvider {
    * @param {port} port
    */
   constructor(user, host, database, password, port, solrendpoint, solrcollection) {
+    /*
     const pool = new Pool({
       user: user,
       host: host,
@@ -21,23 +23,135 @@ class ProductProvider {
       port: port})
 
     this.pool = pool
-    console.log("pp.js " + solrendpoint)
-    console.log("pp.js " + solrcollection)
-    const instance = new SolrProvider(user, host, database, password, port, solrendpoint, solrcollection);
+    */
+   
+    // const instance = new SolrProvider(user, host, database, password, port, solrendpoint, solrcollection);
+    const instance = new PostgresProvider(user, host, database, password, port);
     this.instance = instance
   }
 
-  async getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {
+  async getAllProductsSolr(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {
     try {
       const solrresponse = await this.instance.getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit, offset)
       const docToProductTranformer = new DocToProductTranformer()
       const products = docToProductTranformer.Transform(solrresponse)
-      console.log(products)
       return products;
     } catch (err) {
       console.error('Error fetching products with filters:', err.stack);
       res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
+  }
+
+  async getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, batchnum, sellbefore, manufactured, limit = 20, offset = 0) {
+    console.log("Executing getAllProducts from ProductProvider")
+    return await this.instance.getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, batchnum, sellbefore, manufactured, limit, offset)
+
+    /*
+    let query = 'SELECT * FROM products';
+    const queryParams = [];
+    const conditions = [];
+    let paramIndex = 1;
+
+    if (q) {
+      conditions.push(`(title ILIKE $${paramIndex} OR description ILIKE $${paramIndex} OR EXISTS (SELECT 1 FROM UNNEST(tags) AS tag WHERE tag ILIKE $${paramIndex}))`);
+      queryParams.push(`%${q}%`);
+      paramIndex++;
+    }
+
+    if (category) {
+      conditions.push(`EXISTS (SELECT 1 FROM UNNEST(categories) AS cat WHERE cat ILIKE $${paramIndex})`);
+      queryParams.push(`%${category}%`);
+      paramIndex++;
+    }
+
+    if (brand) {
+      conditions.push(`EXISTS (SELECT 1 FROM UNNEST(brands) AS b WHERE b ILIKE $${paramIndex})`);
+      queryParams.push(`%${brand}%`);
+      paramIndex++;
+    }
+
+    if (min_price && !isNaN(parseFloat(min_price))) {
+      conditions.push(`(price_info->>'price')::numeric >= $${paramIndex}`);
+      queryParams.push(parseFloat(min_price));
+      paramIndex++;
+    }
+
+    if (max_price && !isNaN(parseFloat(max_price))) {
+      conditions.push(`(price_info->>'price')::numeric <= $${paramIndex}`);
+      queryParams.push(parseFloat(max_price));
+      paramIndex++;
+    }
+    if (availability) {
+      conditions.push(`availability = $${paramIndex}`);
+      queryParams.push(availability.toUpperCase());
+      paramIndex++;
+    }
+
+    if (batchnum) {
+      console.log("Batch number filter:", batchnum);
+      conditions.push(`(batchnum->>'batchnum')::numeric >= $${batchnum}`);
+      queryParams.push(parseFloat(batchnum));
+      paramIndex++;
+    }
+    
+    if(sellbefore) {
+      console.log("Sell before filter:", sellbefore);
+      conditions.push(`(sellbefore->>'sellbefore')::date >= $${paramIndex}`);
+      queryParams.push(parseFloat(sellbefore));
+      paramIndex++;
+
+    }
+
+    if(manufactured) {
+      console.log("Manufactured filter:", manufactured);
+      conditions.push(`(manufactured->>'manufactured')::date >= $${paramIndex}`);
+      queryParams.push(parseFloat(manufactured));
+      paramIndex++;
+
+    }
+
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    let orderBy = 'ORDER BY title ASC';
+    if (sort_by) {
+      switch (sort_by) {
+        case 'price_asc':
+          orderBy = 'ORDER BY (price_info->>\'price\')::numeric ASC';
+          break;
+        case 'price_desc':
+          orderBy = 'ORDER BY (price_info->>\'price\')::numeric DESC';
+          break;
+        case 'title_asc':
+          orderBy = 'ORDER BY title ASC';
+          break;
+        case 'title_desc':
+          orderBy = 'ORDER BY title DESC';
+          break;
+        default:
+          break;
+      }
+    }
+    query += ' ' + orderBy;
+
+    query += ` LIMIT $${paramIndex}`;
+    queryParams.push(parseInt(limit));
+    paramIndex++;
+
+    query += ` OFFSET $${paramIndex}`;
+    queryParams.push(parseInt(offset));
+    paramIndex++;
+
+    console.log("Final Query:", query);
+    try {
+      const result = await pool.query(query, queryParams);
+      res.json(result.rows);
+    } catch (err) {
+      console.error('Error fetching products with filters:', err.stack);
+      res.status(500).json({ error: 'Internal Server Error', details: err.message });
+    }
+    */
   }
 
   async getAllProductsNot(q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0) {

@@ -257,11 +257,11 @@ app.get('/', (req, res) => {
  */
 app.get('/api/products', async (req, res) => {
   const {
-    q, category, brand, min_price, max_price, availability, sort_by, limit = 20, offset = 0
+    q, category, brand, min_price, max_price, availability, sort_by, batchnum, sellbefore, manufactured, limit = 20, offset = 0
   } = req.query;
 
   try {
-    const products = await this.instance.getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, limit, offset)
+    const products = await this.instance.getAllProducts(q, category, brand, min_price, max_price, availability, sort_by, batchnum, sellbefore, manufactured, limit, offset)
     res.json(products);
   } catch (err) {
     console.error('Error fetching products with filters:', err.stack);
